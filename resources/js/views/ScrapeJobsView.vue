@@ -4,6 +4,6 @@ import DefaultLayout from '../layouts/DefaultLayout.vue';
 
 <template>
     <DefaultLayout>
-        Websites
+        Scrape Jobs
     </DefaultLayout>
 </template>

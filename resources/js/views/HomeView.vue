@@ -1,8 +1,9 @@
 <script setup>
-import NavigationPanel from '../components/NavigationPanel.vue'
+import DefaultLayout from '../layouts/DefaultLayout.vue';
 </script>
 
 <template>
-    <NavigationPanel />
-    Home
+    <DefaultLayout>
+        Home!
+    </DefaultLayout>
 </template>
