@@ -15,6 +15,11 @@ const props = defineProps({
         required: false,
         default: 'primary',
     },
+    disabled: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
 });
 </script>
 

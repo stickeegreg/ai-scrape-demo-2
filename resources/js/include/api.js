@@ -104,27 +104,30 @@ class Api {
     async deleteScrape(id) {
         return await httpDelete(`/api/scrapes/${id}`);
     }
-    async createScrape(website) {
-        return await post('/api/scrapes', website);
+    async createScrape(scrape) {
+        return await post('/api/scrapes', scrape);
     }
-    async updateScrape(website) {
-        return await put(`/api/scrapes/${website.id}`, website);
+    async updateScrape(scrape) {
+        return await put(`/api/scrapes/${scrape.id}`, scrape);
+    }
+    async runScrape(id) {
+        return await post(`/api/scrapes/${id}/run`);
     }
 
-    async listScrapeJobs() {
-        return await get('/api/scrape-jobs');
+    async listScrapeRuns() {
+        return await get('/api/scrape-runs');
     }
-    async getScrapeJob(id) {
-        return await get(`/api/scrape-jobs/${id}`);
+    async getScrapeRun(id) {
+        return await get(`/api/scrape-runs/${id}`);
     }
-    async deleteScrapeJob(id) {
-        return await httpDelete(`/api/scrape-jobs/${id}`);
+    async deleteScrapeRun(id) {
+        return await httpDelete(`/api/scrape-runs/${id}`);
     }
-    async createScrapeJob(website) {
-        return await post('/api/scrape-jobs', website);
+    async createScrapeRun(scrapeId) {
+        return await post('/api/scrape-runs', {scrape_id: scrapeId});
     }
-    async updateScrapeJob(website) {
-        return await put(`/api/scrape-jobs/${website.id}`, website);
+    async updateScrapeRun(scrapeRun) {
+        return await put(`/api/scrape-runs/${scrapeRun.id}`, scrapeRun);
     }
 }
 

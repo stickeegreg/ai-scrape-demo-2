@@ -38,6 +38,16 @@ const deleteScrape = async (scrape) => {
         alert(`Failed to delete the scrape "${scrape.name}".`);
     }
 };
+
+const runScrape = async (scrape) => {
+    try {
+        await api.runScrape(scrape.id);
+    } catch (error) {
+        console.error(error);
+        error.value = error.message;
+        alert(`Failed to run scrape "${scrape.id}".`);
+    }
+};
 </script>
 
 <template>
@@ -52,7 +62,7 @@ const deleteScrape = async (scrape) => {
                     <tr>
                         <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">ID</th>
                         <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Website</th>
-                        <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Scrape</th>
+                        <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Scrape Type</th>
                         <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">AI</th>
                         <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Actions</th>
                     </tr>

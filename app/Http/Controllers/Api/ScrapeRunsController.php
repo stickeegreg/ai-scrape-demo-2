@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ScrapeJob;
+use App\Models\ScrapeRun;
 use Illuminate\Http\Request;
 
-class ScrapeJobsController extends Controller
+class ScrapeRunsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return ScrapeJob::all();
+        return ScrapeRun::with(['scrape.website', 'scrape.scrapeType'])->get();
     }
 
     /**
@@ -35,15 +35,15 @@ class ScrapeJobsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ScrapeJob $scrapeJob)
+    public function show(ScrapeRun $scrapeRun)
     {
-        return $scrapeJob;
+        return $scrapeRun;
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ScrapeJob $scrapeJob)
+    public function edit(ScrapeRun $scrapeRun)
     {
         //
     }
@@ -51,7 +51,7 @@ class ScrapeJobsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ScrapeJob $scrapeJob)
+    public function update(Request $request, ScrapeRun $scrapeRun)
     {
         //
     }
@@ -59,7 +59,7 @@ class ScrapeJobsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ScrapeJob $scrapeJob)
+    public function destroy(ScrapeRun $scrapeRun)
     {
         //
     }

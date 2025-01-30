@@ -1,5 +1,5 @@
 import HomeView from './views/HomeView.vue';
-import ScrapeJobsView from './views/ScrapeJobsView.vue';
+import ScrapeRunsView from './views/ScrapeRunsView.vue';
 import ScrapesView from './views/ScrapesView.vue';
 import EditScrapeView from './views/EditScrapeView.vue';
 import ScrapeTypesView from './views/ScrapeTypesView.vue';
@@ -9,7 +9,7 @@ import EditWebsiteView from './views/EditWebsiteView.vue';
 
 export default [
     { path: '/', component: HomeView },
-    { path: '/scrape-jobs', component: ScrapeJobsView },
+    { path: '/scrape-runs', component: ScrapeRunsView },
     { path: '/scrapes', component: ScrapesView },
     { path: '/scrapes/create', component: EditScrapeView, props: { create: true } },
     { path: '/scrapes/:id', component: EditScrapeView },

@@ -8,6 +8,6 @@ import LinkTo from '../components/LinkTo.vue';
         <LinkTo class="block" to="/websites">Websites</LinkTo>
         <LinkTo class="block" to="/scrape-types">Scrape Types</LinkTo>
         <LinkTo class="block" to="/scrapes">Scrapes</LinkTo>
-        <LinkTo class="block" to="/scrape-jobs">Scrape Jobs</LinkTo>
+        <LinkTo class="block" to="/scrape-runs">Scrape Runs</LinkTo>
     </nav>
 </template>

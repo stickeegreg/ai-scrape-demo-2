@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateScrapeRequest;
 use App\Http\Requests\UpdateScrapeRequest;
 use App\Models\Scrape;
+use App\Models\ScrapeRun;
 use Illuminate\Http\Request;
 
 class ScrapesController extends Controller
@@ -70,5 +71,18 @@ class ScrapesController extends Controller
         $scrape->delete();
 
         return ['id' => $scrape->id];
+    }
+
+    public function run(Scrape $scrape)
+    {
+        $scrapeRun = ScrapeRun::create([
+            'scrape_id' => $scrape->id,
+            'status' => 'pending',
+            'data' => [],
+        ]);
+
+
+
+        return $scrapeRun;
     }
 }
