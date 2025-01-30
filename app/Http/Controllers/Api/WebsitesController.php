@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateWebsiteRequest;
 use App\Models\Website;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class WebsitesController extends Controller
      */
     public function index()
     {
-        //
+        return Website::all();
     }
 
     /**
@@ -29,7 +30,9 @@ class WebsitesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $website = Website::create($request->validated());
+
+        return $website;
     }
 
     /**
@@ -37,7 +40,7 @@ class WebsitesController extends Controller
      */
     public function show(Website $website)
     {
-        //
+        return $website;
     }
 
     /**
@@ -51,9 +54,11 @@ class WebsitesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Website $website)
+    public function update(UpdateWebsiteRequest $request, Website $website)
     {
-        //
+        $website->update($request->validated());
+
+        return $website;
     }
 
     /**
@@ -61,6 +66,8 @@ class WebsitesController extends Controller
      */
     public function destroy(Website $website)
     {
-        //
+        $website->delete();
+
+        return response()->noContent();
     }
 }
