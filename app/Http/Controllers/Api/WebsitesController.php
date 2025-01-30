@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateWebsiteRequest;
 use App\Http\Requests\UpdateWebsiteRequest;
 use App\Models\Website;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class WebsitesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateWebsiteRequest $request)
     {
         $website = Website::create($request->validated());
 

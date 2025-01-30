@@ -24,7 +24,7 @@ async function get(url) {
     return await parseResponse(response);
 }
 
-async function post(url, data, method) {
+async function post(url, data) {
     const response = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ class Api {
     async deleteWebsite(id) {
         return await get(`/api/websites/${id}`);
     }
-    async storeWebsite(website) {
+    async createWebsite(website) {
         return await post('/api/websites', website);
     }
     async updateWebsite(website) {

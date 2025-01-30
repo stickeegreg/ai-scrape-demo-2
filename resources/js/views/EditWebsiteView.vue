@@ -1,13 +1,22 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { api } from '../include/api';
 import { ValidationError } from '../include/validation-error';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
 import TextInput from '../components/TextInput.vue';
 
+const props = defineProps({
+    create: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+});
+
 const route = useRoute()
+const router = useRouter()
 const id = ref(route.params.id);
 const loading = ref(true);
 const error = ref(null);
@@ -40,7 +49,16 @@ const loadWebsite = async () => {
 };
 
 onMounted(async () => {
-    loadWebsite();
+    if (props.create) {
+        loading.value = false;
+        website.value = {
+            name: '',
+            url: '',
+            prompt: '',
+        };
+    } else {
+        loadWebsite();
+    }
 });
 
 const deleteWebsite = async () => {
@@ -64,10 +82,11 @@ const saveWebsite = async () => {
     saving.value = true;
 
     try {
-        if (id.value) {
-            await api.updateWebsite(website.value);
+        if (props.create) {
+            const newWebsite = await api.createWebsite(website.value);
+            router.push(`/websites/${newWebsite.id}`);
         } else {
-            await api.createWebsite(website.value);
+            await api.updateWebsite(website.value);
         }
 
         alert('Website saved.');
@@ -122,7 +141,7 @@ const saveWebsite = async () => {
                 />
                 <div class="flex items-center justify-between">
                     <ActionButton label="Save" type="submit" :disabled="saving" />
-                    <ActionButton label="Delete" variant="danger" @click="deleteWebsite" :disabled="saving" />
+                    <ActionButton v-if="!create" label="Delete" variant="danger" @click="deleteWebsite" :disabled="saving" />
                 </div>
             </form>
         </div>

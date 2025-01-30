@@ -11,5 +11,6 @@ export default [
     { path: '/scrapes', component: ScrapesView },
     { path: '/scrape-types', component: ScrapeTypesView },
     { path: '/websites', component: WebsitesView },
+    { path: '/websites/create', component: EditWebsiteView, props: { create: true } },
     { path: '/websites/:id', component: EditWebsiteView },
 ];

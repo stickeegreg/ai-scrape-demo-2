@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { api } from '../include/api';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
+import LinkTo from '../components/LinkTo.vue';
 
 const loading = ref(true);
 const error = ref(null);
@@ -45,23 +46,28 @@ const deleteWebsite = async (website) => {
 
         <div v-if="loading">Loading...</div>
         <div v-else>
-            <table>
+            <table class="w-full text-left table-auto min-w-max">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Actions</th>
+                        <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">ID</th>
+                        <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Name</th>
+                        <th class="p-4 border-b border-blue-gray-100 bg-blue-gray-50">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="website in websites" :key="website.id">
-                        <td>{{ website.name }}</td>
-                        <td>
-                            <RouterLink :to="`/websites/${website.id}`">Edit</RouterLink>
-                            <button @click="deleteWebsite(website)">Delete</button>
+                        <td class="p-4 border-b border-blue-gray-50">{{ website.id }}</td>
+                        <td class="p-4 border-b border-blue-gray-50">{{ website.name }}</td>
+                        <td class="p-4 border-b border-blue-gray-50">
+                            <LinkTo class="pr-2" :to="`/websites/${website.id}`">Edit</LinkTo>
+                            <LinkTo @click.prevent="deleteWebsite(website)">Delete</LinkTo>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <div class="mt-4">
+                <LinkTo to="/websites/create">Add Website</LinkTo>
+            </div>
         </div>
     </DefaultLayout>
 </template>
