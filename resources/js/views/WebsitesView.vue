@@ -41,7 +41,7 @@ const deleteWebsite = async (website) => {
 
 <template>
     <DefaultLayout>
-        Websites {{ websites }}
+        <h1 class="mb-4 text-4xl font-bold text-gray-900">Websites</h1>
         {{ error }}
 
         <div v-if="loading">Loading...</div>
@@ -60,7 +60,7 @@ const deleteWebsite = async (website) => {
                         <td class="p-4 border-b border-blue-gray-50">{{ website.name }}</td>
                         <td class="p-4 border-b border-blue-gray-50">
                             <LinkTo class="pr-2" :to="`/websites/${website.id}`">Edit</LinkTo>
-                            <LinkTo @click.prevent="deleteWebsite(website)">Delete</LinkTo>
+                            <LinkTo variant="danger" @click.prevent="deleteWebsite(website)">Delete</LinkTo>
                         </td>
                     </tr>
                 </tbody>

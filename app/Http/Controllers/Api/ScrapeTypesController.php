@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateScrapeTypeRequest;
+use App\Http\Requests\UpdateScrapeTypeRequest;
 use App\Models\ScrapeType;
 use Illuminate\Http\Request;
 
@@ -13,7 +15,7 @@ class ScrapeTypesController extends Controller
      */
     public function index()
     {
-        //
+        return ScrapeType::all();
     }
 
     /**
@@ -27,9 +29,11 @@ class ScrapeTypesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateScrapeTypeRequest $request)
     {
-        //
+        $scrapeType = ScrapeType::create($request->validated());
+
+        return $scrapeType;
     }
 
     /**
@@ -37,7 +41,7 @@ class ScrapeTypesController extends Controller
      */
     public function show(ScrapeType $scrapeType)
     {
-        //
+        return $scrapeType;
     }
 
     /**
@@ -51,9 +55,11 @@ class ScrapeTypesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ScrapeType $scrapeType)
+    public function update(UpdateScrapeTypeRequest $request, ScrapeType $scrapeType)
     {
-        //
+        $scrapeType->update($request->validated());
+
+        return $scrapeType;
     }
 
     /**
@@ -61,6 +67,8 @@ class ScrapeTypesController extends Controller
      */
     public function destroy(ScrapeType $scrapeType)
     {
-        //
+        $scrapeType->delete();
+
+        return ['id' => $scrapeType->id];
     }
 }

@@ -21,7 +21,7 @@ const id = ref(route.params.id);
 const loading = ref(true);
 const error = ref(null);
 const errors = ref(null);
-const website = ref(null);
+const scrapeType = ref(null);
 const saving = ref(false);
 
 watch(
@@ -29,17 +29,17 @@ watch(
   (newId, oldId) => {
     id.value = newId;
 
-    loadWebsite();
+    loadScrapeType();
   }
 );
 
-const loadWebsite = async () => {
+const loadScrapeType = async () => {
     loading.value = true;
     error.value = null;
-    website.value = null;
+    scrapeType.value = null;
 
     try {
-        website.value = await api.getWebsite(id.value);
+        scrapeType.value = await api.getScrapeType(id.value);
     } catch (error) {
         console.error(error);
         error.value = error.message;
@@ -51,45 +51,45 @@ const loadWebsite = async () => {
 onMounted(async () => {
     if (props.create) {
         loading.value = false;
-        website.value = {
+        scrapeType.value = {
             name: '',
             url: '',
             prompt: '',
         };
     } else {
-        loadWebsite();
+        loadScrapeType();
     }
 });
 
-const deleteWebsite = async () => {
-    if (!confirm(`Are you sure you want to delete the website "${website.value.name}"?`)) {
+const deleteScrapeType = async () => {
+    if (!confirm(`Are you sure you want to delete the scrapeType "${scrapeType.value.name}"?`)) {
         return;
     }
 
     try {
-        await api.deleteWebsite(website.value.id);
-        websites.value = websites.value.filter((w) => w.id !== website.id);
+        await api.deleteScrapeType(scrapeType.value.id);
+        scrapeTypes.value = scrapeTypes.value.filter((w) => w.id !== scrapeType.id);
     } catch (error) {
         console.error(error);
         error.value = error.message;
-        alert(`Failed to delete the website "${website.value.name}".`);
+        alert(`Failed to delete the scrapeType "${scrapeType.value.name}".`);
     }
 };
 
-const saveWebsite = async () => {
+const saveScrapeType = async () => {
     error.value = null;
     errors.value = null;
     saving.value = true;
 
     try {
         if (props.create) {
-            const newWebsite = await api.createWebsite(website.value);
-            router.push(`/websites/${newWebsite.id}`);
+            const newScrapeType = await api.createScrapeType(scrapeType.value);
+            router.push(`/scrape-types/${newScrapeType.id}`);
         } else {
-            await api.updateWebsite(website.value);
+            await api.updateScrapeType(scrapeType.value);
         }
 
-        alert('Website saved.');
+        alert('ScrapeType saved.');
     } catch (error) {
         if (error instanceof ValidationError) {
             error.value = error.message;
@@ -107,42 +107,42 @@ const saveWebsite = async () => {
 
 <template>
     <DefaultLayout>
-        <h1 class="mb-4 text-4xl font-bold text-gray-900">{{ create ? 'Create' : 'Edit' }} Website</h1>
+        <h1 class="mb-4 text-4xl font-bold text-gray-900">{{ create ? 'Create' : 'Edit' }} Scrape Type</h1>
         {{ error }}
 
         <div v-if="loading">Loading...</div>
         <div v-else>
             <form
                 class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-                @submit.prevent="saveWebsite"
+                @submit.prevent="saveScrapeType"
             >
                 <TextInput
                     name="name"
                     label="Name"
                     placeholder="Name"
-                    v-model="website.name"
+                    v-model="scrapeType.name"
                     :error="errors?.name?.[0]"
-                    required
-                />
-                <TextInput
-                    name="url"
-                    label="URL"
-                    placeholder="https://example.com"
-                    v-model="website.url"
-                    :error="errors?.url?.[0]"
                     required
                 />
                 <TextInput
                     name="prompt"
                     label="Custom Prompt"
                     placeholder="Custom prompt"
-                    v-model="website.prompt"
+                    v-model="scrapeType.prompt"
                     :error="errors?.prompt?.[0]"
+                    type="textarea"
+                />
+                <TextInput
+                    name="fields"
+                    label="Fields"
+                    placeholder="Fields (JSON)"
+                    v-model="scrapeType.fields"
+                    :error="errors?.fields?.[0]"
                     type="textarea"
                 />
                 <div class="flex items-center justify-between">
                     <ActionButton label="Save" type="submit" :disabled="saving" />
-                    <ActionButton v-if="!create" label="Delete" variant="danger" @click="deleteWebsite" :disabled="saving" />
+                    <ActionButton v-if="!create" label="Delete" variant="danger" @click="deleteScrapeType" :disabled="saving" />
                 </div>
             </form>
         </div>

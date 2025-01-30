@@ -13,7 +13,7 @@ class ScrapeJobsController extends Controller
      */
     public function index()
     {
-        //
+        return ScrapeJob::all();
     }
 
     /**
@@ -37,7 +37,7 @@ class ScrapeJobsController extends Controller
      */
     public function show(ScrapeJob $scrapeJob)
     {
-        //
+        return $scrapeJob;
     }
 
     /**

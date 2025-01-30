@@ -69,6 +69,6 @@ class WebsitesController extends Controller
     {
         $website->delete();
 
-        return response()->noContent();
+        return ['id' => $website->id];
     }
 }

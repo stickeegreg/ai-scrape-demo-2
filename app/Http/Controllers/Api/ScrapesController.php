@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateScrapeRequest;
+use App\Http\Requests\UpdateScrapeRequest;
 use App\Models\Scrape;
 use Illuminate\Http\Request;
 
@@ -13,7 +15,7 @@ class ScrapesController extends Controller
      */
     public function index()
     {
-        //
+        return Scrape::with(['website', 'scrapeType'])->get();
     }
 
     /**
@@ -27,9 +29,11 @@ class ScrapesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateScrapeRequest $request)
     {
-        //
+        $scrape = Scrape::create($request->validated());
+
+        return $scrape;
     }
 
     /**
@@ -37,7 +41,7 @@ class ScrapesController extends Controller
      */
     public function show(Scrape $scrape)
     {
-        //
+        return $scrape;
     }
 
     /**
@@ -51,9 +55,11 @@ class ScrapesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Scrape $scrape)
+    public function update(UpdateScrapeRequest $request, Scrape $scrape)
     {
-        //
+        $scrape->update($request->validated());
+
+        return $scrape;
     }
 
     /**
@@ -61,6 +67,8 @@ class ScrapesController extends Controller
      */
     public function destroy(Scrape $scrape)
     {
-        //
+        $scrape->delete();
+
+        return ['id' => $scrape->id];
     }
 }
