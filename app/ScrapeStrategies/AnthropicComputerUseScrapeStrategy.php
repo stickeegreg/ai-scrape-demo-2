@@ -10,12 +10,12 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
     public static function factory(ProgressReporterInterface $progressReporter): ScrapeStrategyInterface
     {
         // TODO: this should take a VNC server address from the pool
-        return new self(config('scrape.anthropic.api_key'), config('scrape.vnc_addresses')[0]);
+        return new self(config('scrape.anthropic.api_key'), config('scrape.no_vnc_addresses')[0]);
     }
 
     public function __construct(
         private string $apiKey,
-        private string $vncAddress
+        private string $noVncAddress
     ) {
     }
 
@@ -24,8 +24,8 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         return [];
     }
 
-    public function getVncAddress(): string
+    public function getNoVncAddress(): string
     {
-        return $this->vncAddress;
+        return $this->noVncAddress;
     }
 }

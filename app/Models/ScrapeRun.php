@@ -45,14 +45,14 @@ class ScrapeRun extends Model
 
             $scrapeStrategy = $this->scrape->class::factory($progressReporter);
             $data = $this->data;
-            $data['vnc_address'] = $scrapeStrategy->getVncAddress();
+            $data['no_vnc_address'] = $scrapeStrategy->getNoVncAddress();
             $this->data = $data;
             $this->save();
 
             $this->update(['status' => 'completed']);
             $progressReporter->reportComplete();
         } catch (Exception $e) {
-            $this->stauts = 'failed';
+            $this->status = 'failed';
             $data = $this->data;
             $data['error'] = $e->getMessage();
             $this->data = $data;

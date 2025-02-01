@@ -53,6 +53,11 @@ onMounted(async () => {
         <div v-else>
             Status: {{ scrapeRun.status }}
             <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre>
+            <iframe
+                :src="`http://${scrapeRun.data.no_vnc_address}/vnc.html?view_only=1&autoconnect=1&resize=scale`"
+                class="h-screen w-full"
+                allow="fullscreen"
+            ></iframe>
         </div>
     </DefaultLayout>
 </template>

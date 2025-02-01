@@ -7,7 +7,7 @@ import NavigationPanel from '../components/NavigationPanel.vue'
         <div>
             <NavigationPanel />
         </div>
-        <div>
+        <div class="flex-1">
             <slot />
         </div>
     </div>

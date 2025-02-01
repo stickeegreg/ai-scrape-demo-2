@@ -8,5 +8,5 @@ interface ScrapeStrategyInterface
 {
     public static function factory(ProgressReporterInterface $progressReporter): ScrapeStrategyInterface;
     public function scrape(string $url): array;
-    public function getVncAddress(): string;
+    public function getNoVncAddress(): string;
 }
