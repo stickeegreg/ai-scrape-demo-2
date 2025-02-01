@@ -15,7 +15,7 @@ class WebsitesController extends Controller
      */
     public function index()
     {
-        return Website::all();
+        return Website::orderBy('name')->get();
     }
 
     /**

@@ -17,7 +17,6 @@ const update = async () => {
 
     loading.value = true;
     error.value = null;
-    scrapeRuns.value = [];
 
     try {
         scrapeRuns.value = await api.listScrapeRuns();
@@ -30,15 +29,28 @@ const update = async () => {
 };
 
 let updateInterval;
+const onFocus = () => {
+    clearInterval(updateInterval);
+    updateInterval = setInterval(update, 2000);
+};
+const onBlur = () => {
+    clearInterval(updateInterval);
+};
 
 onMounted(async () => {
     await update();
     initialLoad.value = false;
 
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
+
     updateInterval = setInterval(update, 2000);
 });
 
 onUnmounted(() => {
+    window.removeEventListener('focus', onFocus);
+    window.removeEventListener('blur', onBlur);
+
     clearInterval(updateInterval);
 });
 

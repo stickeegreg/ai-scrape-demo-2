@@ -123,12 +123,6 @@ class Api {
     async deleteScrapeRun(id) {
         return await httpDelete(`/api/scrape-runs/${id}`);
     }
-    async createScrapeRun(scrapeId) {
-        return await post('/api/scrape-runs', {scrape_id: scrapeId});
-    }
-    async updateScrapeRun(scrapeRun) {
-        return await put(`/api/scrape-runs/${scrapeRun.id}`, scrapeRun);
-    }
 }
 
 export const api = new Api();

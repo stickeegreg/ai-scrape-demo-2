@@ -15,7 +15,7 @@ class ScrapeTypesController extends Controller
      */
     public function index()
     {
-        return ScrapeType::all();
+        return ScrapeType::orderBy('name')->get();
     }
 
     /**

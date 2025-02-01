@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\ScrapeRun;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -12,7 +13,7 @@ class ScrapeJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct(private ScrapeRun $scrapeRun)
     {
         //
     }
@@ -22,6 +23,8 @@ class ScrapeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        //
+        $this->scrapeRun->update(['status' => 'running']);
+        sleep(5);
+        $this->scrapeRun->update(['status' => 'completed']);
     }
 }

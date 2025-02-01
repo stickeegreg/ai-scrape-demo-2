@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateScrapeRequest;
 use App\Http\Requests\UpdateScrapeRequest;
+use App\Jobs\ScrapeJob;
 use App\Models\Scrape;
 use App\Models\ScrapeRun;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class ScrapesController extends Controller
      */
     public function index()
     {
-        return Scrape::with(['website', 'scrapeType'])->get();
+        return Scrape::with(['website', 'scrapeType'])->get()->sortBy(['website.name', 'scrape_type.name']);
     }
 
     /**
@@ -81,7 +82,7 @@ class ScrapesController extends Controller
             'data' => [],
         ]);
 
-
+        ScrapeJob::dispatch($scrapeRun);
 
         return $scrapeRun;
     }

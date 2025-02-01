@@ -13,7 +13,7 @@ class ScrapeRunsController extends Controller
      */
     public function index()
     {
-        return ScrapeRun::with(['scrape.website', 'scrape.scrapeType'])->get();
+        return ScrapeRun::with(['scrape.website', 'scrape.scrapeType'])->orderBy('created_at', 'desc')->get();
     }
 
     /**
