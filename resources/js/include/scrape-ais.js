@@ -1,3 +1,3 @@
 export const scrapeStrategies = {
-    'App\\ScrapeStrategies\\TempScrapeStrategy': 'Temp Scrape Strategy',
+    'App\\ScrapeStrategies\\AnthropicComputerUseScrapeStrategy': 'Anthropic Computer Use Scrape Strategy',
 };

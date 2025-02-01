@@ -42,15 +42,15 @@ class ScrapeRun extends Model
     {
         try {
             $this->update(['status' => 'running']);
-            sleep(1);
-            $progressReporter->reportPercent(25);
-            sleep(1);
-            $progressReporter->reportPercent(50);
-            sleep(1);
-            $progressReporter->reportPercent(75);
-            sleep(1);
-            $progressReporter->reportComplete(75);
+
+            $scrapeStrategy = $this->scrape->class::factory($progressReporter);
+            $data = $this->data;
+            $data['vnc_address'] = $scrapeStrategy->getVncAddress();
+            $this->data = $data;
+            $this->save();
+
             $this->update(['status' => 'completed']);
+            $progressReporter->reportComplete();
         } catch (Exception $e) {
             $this->stauts = 'failed';
             $data = $this->data;
