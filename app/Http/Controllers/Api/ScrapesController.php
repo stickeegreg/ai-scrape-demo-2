@@ -79,7 +79,6 @@ class ScrapesController extends Controller
         $scrapeRun = ScrapeRun::create([
             'scrape_id' => $scrape->id,
             'status' => 'pending',
-            'data' => [],
         ]);
 
         ScrapeJob::dispatch($scrapeRun);

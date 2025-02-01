@@ -23,8 +23,6 @@ class ScrapeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->scrapeRun->update(['status' => 'running']);
-        sleep(5);
-        $this->scrapeRun->update(['status' => 'completed']);
+        $this->scrapeRun->run();
     }
 }
