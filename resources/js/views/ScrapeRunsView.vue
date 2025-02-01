@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { api } from '../include/api';
-import { scrapeAis } from '../include/scrape-ais';
+import { scrapeStrategies } from '../include/scrape-ais';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import LinkTo from '../components/LinkTo.vue';
 
@@ -95,7 +95,7 @@ const deleteScrapeRun = async (scrapeRun) => {
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeRun.scrape.website.name }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeRun.scrape.scrape_type.name }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeRun.scrape.url }}</td>
-                        <td class="p-4 border-b border-blue-gray-50">{{ scrapeAis[scrapeRun.scrape.class] }}</td>
+                        <td class="p-4 border-b border-blue-gray-50">{{ scrapeStrategies[scrapeRun.scrape.class] }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeRun.status }}</td>
                         <td class="p-4 border-b border-blue-gray-50">
                             <LinkTo class="pr-2" :to="`/scrape-runs/${scrapeRun.id}`">Edit</LinkTo>

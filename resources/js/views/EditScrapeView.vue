@@ -3,7 +3,7 @@ import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '../include/api';
 import { ValidationError } from '../include/validation-error';
-import { scrapeAis } from '../include/scrape-ais';
+import { scrapeStrategies } from '../include/scrape-ais';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
 import SelectInput from '../components/SelectInput.vue';
@@ -27,7 +27,7 @@ const scrape = ref(null);
 const saving = ref(false);
 const websites = ref([]);
 const scrapeTypes = ref([]);
-const classOptions = Object.entries(scrapeAis).map(([key, value]) => ({ value: key, label: value }));
+const classOptions = Object.entries(scrapeStrategies).map(([key, value]) => ({ value: key, label: value }));
 
 watch(
   () => route.params.id,

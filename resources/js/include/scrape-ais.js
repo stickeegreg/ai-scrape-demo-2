@@ -1,3 +1,3 @@
-export const scrapeAis = {
-    'App\\ScrapeAis\\TempScrapeAi': 'Temp Scrape Ai',
+export const scrapeStrategies = {
+    'App\\ScrapeStrategies\\TempScrapeStrategy': 'Temp Scrape Strategy',
 };

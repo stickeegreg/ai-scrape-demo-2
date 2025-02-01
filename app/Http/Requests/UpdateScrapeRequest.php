@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\ScrapeAis\ScrapeAiInterface;
+use App\ScrapeStrategies\ScrapeStrategyInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateScrapeRequest extends FormRequest
@@ -33,8 +33,8 @@ class UpdateScrapeRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     if (!class_exists($value)) {
                         $fail("The {$attribute} must be a valid class.");
-                    } elseif (!is_subclass_of($value, ScrapeAiInterface::class)) {
-                        $fail("The {$attribute} must extend ScrapeAiInterface.");
+                    } elseif (!is_subclass_of($value, ScrapeStrategyInterface::class)) {
+                        $fail("The {$attribute} must extend ScrapeStrategyInterface.");
                     }
                 },
             ],
