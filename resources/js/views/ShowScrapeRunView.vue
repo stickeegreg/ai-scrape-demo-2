@@ -64,7 +64,7 @@ const screenshot = async () => {
 onMounted(async () => {
     await loadScrapeRun();
 
-    rfb = new RFB(vncContainer.value, 'ws://localhost:6080');
+    rfb = new RFB(vncContainer.value, `ws://${scrapeRun.value.data.no_vnc_address}`);
     rfb.scaleViewport = true;
     rfb.viewOnly = viewOnly.value;
 });
