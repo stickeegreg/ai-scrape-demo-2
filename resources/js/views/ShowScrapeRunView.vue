@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from '../include/api';
+import RFB from '@novnc/novnc';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
 
@@ -11,6 +12,10 @@ const loading = ref(true);
 const error = ref(null);
 const scrapeRun = ref(null);
 const viewOnly = ref(true);
+const vncContainer = ref(null);
+const screenshots = ref([]);
+const screenshotCanvas = ref(null);
+let rfb = null;
 
 watch(
   () => route.params.id,
@@ -20,6 +25,10 @@ watch(
     loadScrapeRun();
   }
 );
+
+watch(viewOnly, (newViewOnly, oldViewOnly) => {
+    rfb.viewOnly = newViewOnly;
+});
 
 const loadScrapeRun = async () => {
     loading.value = true;
@@ -36,8 +45,28 @@ const loadScrapeRun = async () => {
     }
 };
 
+const screenshot = async () => {
+    try {
+        const imageData = rfb.getImageData();
+
+        screenshotCanvas.value.width = imageData.width;
+        screenshotCanvas.value.height = imageData.height;
+
+        const ctx = screenshotCanvas.value.getContext('2d');
+        ctx.putImageData(imageData, 0, 0);
+
+        screenshots.value.push(screenshotCanvas.value.toDataURL());
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 onMounted(async () => {
-    loadScrapeRun();
+    await loadScrapeRun();
+
+    rfb = new RFB(vncContainer.value, 'ws://localhost:6080');
+    rfb.scaleViewport = true;
+    rfb.viewOnly = viewOnly.value;
 });
 </script>
 
@@ -51,11 +80,12 @@ onMounted(async () => {
             Status: {{ scrapeRun.status }}
             <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre>
             <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" />
-            <iframe
-                :src="`http://${scrapeRun.data.no_vnc_address}/vnc.html?view_only=${viewOnly ? 1 : 0}&autoconnect=1&resize=scale`"
-                class="h-screen w-full"
-                allow="fullscreen"
-            ></iframe>
+            <ActionButton @click="screenshot" label="Capture Screenshot" />
+            <div ref="vncContainer" class="w-full h-screen"></div>
+            <canvas ref="screenshotCanvas" class="hidden"></canvas>
+            <div v-for="screenshot in screenshots">
+                <img :src="screenshot" />
+            </div>
         </div>
     </DefaultLayout>
 </template>
