@@ -1,19 +1,16 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { api } from '../include/api';
-import { ValidationError } from '../include/validation-error';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
-import TextInput from '../components/TextInput.vue';
 
 const route = useRoute()
-const router = useRouter()
 const id = ref(route.params.id);
 const loading = ref(true);
 const error = ref(null);
-const errors = ref(null);
 const scrapeRun = ref(null);
+const viewOnly = ref(true);
 
 watch(
   () => route.params.id,
@@ -53,8 +50,9 @@ onMounted(async () => {
         <div v-else>
             Status: {{ scrapeRun.status }}
             <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre>
+            <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" />
             <iframe
-                :src="`http://${scrapeRun.data.no_vnc_address}/vnc.html?view_only=1&autoconnect=1&resize=scale`"
+                :src="`http://${scrapeRun.data.no_vnc_address}/vnc.html?view_only=${viewOnly ? 1 : 0}&autoconnect=1&resize=scale`"
                 class="h-screen w-full"
                 allow="fullscreen"
             ></iframe>

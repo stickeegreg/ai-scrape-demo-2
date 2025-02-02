@@ -7,5 +7,5 @@ return [
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
     ],
-    'no_vnc_addresses' => array_filter(array_map('trim', explode(',', env('NO_VNC_ADDRESSES')))),
+    'no_vnc_addresses' => array_filter(array_map('trim', explode(',', env('NO_VNC_ADDRESSES', '')))),
 ];
