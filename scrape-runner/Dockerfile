@@ -41,6 +41,8 @@ RUN apt-get update && \
         # PPA req
         software-properties-common && \
         # Userland apps
+        curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
+        sudo bash nodesource_setup.sh && \
         sudo add-apt-repository ppa:mozillateam/ppa && \
         sudo apt-get install -y --no-install-recommends \
         libreoffice \
@@ -49,10 +51,12 @@ RUN apt-get update && \
         x11-apps \
         xpdf \
         gedit \
+        nodejs \
         xpaint \
         tint2 \
         galculator \
         pcmanfm \
+        vim \
         unzip && \
     apt-get clean
 
@@ -98,6 +102,9 @@ WORKDIR $HOME
 # # setup desktop env & app
 COPY --chown=$USERNAME:$USERNAME image/ $HOME
 # COPY --chown=$USERNAME:$USERNAME computer_use_demo/ $HOME/computer_use_demo/
+
+RUN cd $HOME/screenshot-service && \
+    npm install
 
 ARG DISPLAY_NUM=1
 ARG HEIGHT=768

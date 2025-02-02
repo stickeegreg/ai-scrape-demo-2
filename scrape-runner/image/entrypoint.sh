@@ -4,7 +4,13 @@ set -euo pipefail
 ./start_all.sh
 ./novnc_startup.sh
 
-echo "VNC is now ready on port 5900"
+#!/bin/bash
+echo "starting screenshot-service"
+
+cd $HOME/screenshot-service
+node index.js > /tmp/screenshot-service.log 2>&1 &
+
+echo "Screenshot service is now ready on port 3000"
 
 # Keep the container running
 tail -f /dev/null
