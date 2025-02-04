@@ -49,6 +49,8 @@ class ScrapeRun extends Model
             $this->data = $data;
             $this->save();
 
+            $scrapeStrategy->scrape($this->scrape->url);
+
             $this->update(['status' => 'completed']);
             $progressReporter->reportComplete();
         } catch (Exception $e) {

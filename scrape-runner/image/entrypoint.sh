@@ -8,7 +8,7 @@ set -euo pipefail
 echo "starting screenshot-service"
 
 cd $HOME/screenshot-service
-node index.js > /tmp/screenshot-service.log 2>&1 &
+node index.js 2>&1 | tee /tmp/screenshot-service.log &
 
 echo "Screenshot service is now ready on port 3000"
 
