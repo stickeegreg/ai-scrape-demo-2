@@ -8,6 +8,23 @@ use Illuminate\Support\Facades\Log;
 
 class ToolCollection extends Collection
 {
+    /**
+     * Create a new collection.
+     *
+     * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TValue>|iterable<TKey, TValue>|null  $items
+     * @return self<TKey, TValue>
+     */
+    public static function create($items = [])
+    {
+        $newItems = [];
+
+        foreach ($items as $item) {
+            $newItems[$item->getName()] = $item;
+        }
+
+        return new self($newItems);
+    }
+
     public function run(string $name, array $arguments = []): ToolResult
     {
         $tool = $this->get($name);

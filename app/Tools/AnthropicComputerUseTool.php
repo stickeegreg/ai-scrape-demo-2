@@ -19,10 +19,46 @@ class AnthropicComputerUseTool implements ToolInterface
         private CommandExecutorInterface $commandExecutor,
         private int $width,
         private int $height,
-        private ?int $displayNum
+        private ?int $displayNumber
     ) {
-        $this->xDoTool = $this->displayNum ? "DISPLAY=:{$this->displayNum} xdotool" : 'xdotool';
+        $this->xDoTool = $this->displayNumber ? "DISPLAY=:{$this->displayNumber} xdotool" : 'xdotool';
     }
+
+    public static function getName(): string
+    {
+        // NOTE: This name comes from Anthropic and must not be changed.
+        return "computer";
+    }
+
+    public static function getDescription(): string
+    {
+        return "Interact with the screen, keyboard, and mouse of the current computer.";
+    }
+
+    public static function getInputSchema(): object
+    {
+        // This is a special type, not a normal tool
+        // See https://docs.anthropic.com/en/docs/build-with-claude/computer-use
+        return (object) [
+            "type" => "computer_20241022",
+            "name" => "computer",
+            "display_width_px" => 1024,
+            "display_height_px" => 768,
+            "display_number" => 1,
+        ];
+    }
+
+    // public function getDefinition(): array
+    // {
+    //     // TODO get these properly
+    //     return [
+    //         "type" => "computer_20241022",
+    //         "name" => "computer",
+    //         "display_width_px" => $this->width,
+    //         "display_height_px" => $this->height,
+    //         "display_number" => $this->displayNumber,
+    //     ];
+    // }
 
     public function run(array $args): ToolResult
     {
@@ -88,7 +124,7 @@ class AnthropicComputerUseTool implements ToolInterface
         sleep($this->screenshotDelay);
         // TODO inject url or screenshot strategy
         // TODO error handling
-        return file_get_contents("http://localhost:3000/desktop-screenshot");
+        return file_get_contents("http://localhost:3000/screenshot-desktop");
     }
 }
 
