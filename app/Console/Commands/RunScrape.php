@@ -36,16 +36,19 @@ class RunScrape extends Command
             return self::FAILURE;
         }
 
+        /** @var \App\Models\ScrapeRun $scrapeRun */
         $scrapeRun = ScrapeRun::create([
             'scrape_id' => $scrape->id,
             'status' => 'running',
         ]);
 
-        $this->info('Created scrape run ' . $scrapeRun->id);
+        $this->info('Created scrape run ' . $scrapeRun->id . ' http://ai-scrape-demo-2.test/scrape-runs/' . $scrapeRun->id);
 
         $progressReporter = new ConsoleProgressReporter($this->output);
 
         $scrapeRun->run($progressReporter);
+
+        $this->info('Finished scrape run ' . $scrapeRun->id . ' http://ai-scrape-demo-2.test/scrape-runs/' . $scrapeRun->id);
 
         return self::SUCCESS;
     }

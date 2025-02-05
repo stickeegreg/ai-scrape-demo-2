@@ -5,6 +5,7 @@ import { api } from '../include/api';
 import RFB from '@novnc/novnc';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
+import ScrapeRunMessages from '../components/ScrapeRunMessages.vue';
 
 const route = useRoute()
 const id = ref(route.params.id);
@@ -78,7 +79,10 @@ onMounted(async () => {
         <div v-if="loading">Loading...</div>
         <div v-else>
             Status: {{ scrapeRun.status }}
-            <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre>
+            <!-- <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre> -->
+
+            <ScrapeRunMessages :messages="scrapeRun.data.messages || []" />
+
             <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" />
             <ActionButton @click="screenshot" label="Capture Screenshot" />
             <div ref="vncContainer" class="w-full h-screen"></div>
