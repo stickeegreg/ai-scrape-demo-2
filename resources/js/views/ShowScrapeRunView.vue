@@ -78,14 +78,25 @@ onMounted(async () => {
 
         <div v-if="loading">Loading...</div>
         <div v-else>
-            Status: {{ scrapeRun.status }}
+            <div class="p-2 mb-2">
+                Status:
+                <span class="p-2 rounded text-white font-bold" :class="{'bg-grey-400': (scrapeRun.status !== 'failed') && (scrapeRun.status !== 'completed'), 'bg-red-600': scrapeRun.status === 'failed', 'bg-green-600': scrapeRun.status === 'completed'}">
+                    {{ scrapeRun.status }}
+                </span>
+            </div>
             <!-- <pre>{{ JSON.stringify((scrapeRun.data), null, 2) }}</pre> -->
 
             <ScrapeRunMessages :messages="scrapeRun.data.messages || []" />
+            <div v-if="scrapeRun.data.error">
+                <h2 class="text-2xl font-bold text-gray-900">Error</h2>
+                <div class="bg-red-200 p-2 rounded">{{ scrapeRun.data.error }}</div>
+            </div>
 
-            <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" />
-            <ActionButton @click="screenshot" label="Capture Screenshot" />
-            <div ref="vncContainer" class="w-full h-screen"></div>
+            <div class="mt-2">
+                <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" class="mr-2" />
+                <ActionButton @click="screenshot" label="Capture Screenshot" />
+            </div>
+            <div ref="vncContainer" class="w-full h-screen mt-2"></div>
             <canvas ref="screenshotCanvas" class="hidden"></canvas>
             <div v-for="screenshot in screenshots">
                 <img :src="screenshot" />

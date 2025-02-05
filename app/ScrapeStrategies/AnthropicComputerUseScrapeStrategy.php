@@ -17,10 +17,11 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
     public static function factory(ProgressReporterInterface $progressReporter): ScrapeStrategyInterface
     {
         // TODO: this should take a VNC server address from the pool
-        return new self(config('scrape.anthropic.api_key'), config('scrape.no_vnc_addresses')[0]);
+        return new self($progressReporter, config('scrape.anthropic.api_key'), config('scrape.no_vnc_addresses')[0]);
     }
 
     public function __construct(
+        private ProgressReporterInterface $progressReporter,
         private string $apiKey,
         private string $noVncAddress
     ) {
@@ -105,7 +106,10 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                     ],
                     [
                         'type' => 'text',
-                        'text' => 'Your task is to get article titles from the https://zebra-north.com website. The website is already loaded in Chrome. Please browse to the c++ articles page and get the title of the first 5 articles.',
+                        'text' => 'Your task is to get article titles from the https://zebra-north.com website.
+The website is already loaded in Chrome.
+Please browse to the c++ articles page and get the title of the first 5 articles.
+When you have them, use the save_text tool to save each one individually.',
                     ],
                 ],
             ],
@@ -139,7 +143,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                 throw new Exception('Unexpected stop reason: ' . $result->stop_reason);
             }
 
-            dump('ACTIONS: ' . implode(', ', array_filter(array_map(fn ($c) => $c->type === 'tool_use' ? ($c->name === 'computer' ? ($c->input['action'] ?? 'MALFORMED') : $c->name) : null, $result->content))));
+            $this->progressReporter->reportMessage('ACTIONS: ' . implode(', ', array_filter(array_map(fn ($c) => $c->type === 'tool_use' ? ($c->name === 'computer' ? ($c->input['action'] ?? 'MALFORMED') : $c->name) : null, $result->content))));
 
             $messages[] = [
                 'role' => 'assistant',
@@ -161,7 +165,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 
             foreach ($result->content as $content) {
                 if ($content->type === 'tool_use') {
-                    dump('Execute ' . $content->name, $content->input);
+                    $this->progressReporter->reportMessage('Execute ' . $content->name, $content->input);
                     $toolResult = $toolCollection->run($content->name, $content->input);
 
                     if ($toolResult->error) {
@@ -205,9 +209,9 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 
                     sleep(2);
                 } elseif ($content->type === 'text') {
-                    dump('TEXT:', $content->text);
+                    $this->progressReporter->reportMessage('TEXT:', var_export($content->text, true));
                 } else {
-                    dump('Unexpected content type:', $content->type);
+                    $this->progressReporter->reportMessage('Unexpected content type: ' . $content->type);
                     dump($content);
                 }
             }
