@@ -1,6 +1,8 @@
 const http = require('http');
 // const { Monitor } = require('node-screenshots');
 const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 // let monitor = Monitor.fromPoint(100, 100);
 // console.log(monitor, monitor.id);
@@ -68,6 +70,24 @@ http.createServer((req, res) => {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
 
             return res.end('Error executing command');
+        }
+    }  else if (req.method === 'GET' && req.url.startsWith('/get-recording')) {
+        try {
+            const filePath = '/tmp/recording.webm';
+            const fileName = path.basename(filePath);
+
+            res.writeHead(200, {
+                'Content-Disposition': `attachment; filename="${fileName}"`,
+                'Content-Type': 'application/octet-stream'
+            });
+
+            const fileStream = fs.createReadStream(filePath);
+            fileStream.pipe(res);
+        } catch (err) {
+            console.error(err);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+
+            return res.end('Error sending file');
         }
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });

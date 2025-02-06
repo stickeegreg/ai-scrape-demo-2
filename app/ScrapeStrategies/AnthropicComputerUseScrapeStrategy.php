@@ -12,6 +12,7 @@ use App\Tools\AnthropicComputerUseTool;
 use App\Tools\SaveTextTool;
 use App\Tools\ToolCollection;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 {
@@ -123,10 +124,7 @@ When you have them, use the save_text tool to save each one individually.',
             ]);
 
             if ($result->stop_reason === 'end_turn') {
-                $commandExecutor->execute('/home/stickee/stop_recording.sh');
-
-                // TODO check if we have all the data we need
-                return $dataRepository->getData();
+                break;
             }
 
             if ($result->stop_reason !== 'tool_use') {
@@ -215,6 +213,13 @@ When you have them, use the save_text tool to save each one individually.',
         }
 
         $commandExecutor->execute('/home/stickee/stop_recording.sh');
+
+        Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://localhost:3000/get-recording'));
+
+        $data = $scrapeRun->data;
+        $data['recording'] = 'recording-' . $scrapeRun->id . '.webm';
+        $scrapeRun->data = $data;
+        $scrapeRun->save();
 
         return $dataRepository->getData();
     }

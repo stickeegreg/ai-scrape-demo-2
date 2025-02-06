@@ -101,6 +101,11 @@ onMounted(async () => {
                 <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" class="mr-2" />
                 <ActionButton @click="screenshot" label="Capture Screenshot" />
             </div>
+
+            <video v-if="scrapeRun.data.recording" controls class="mt-2">
+                <source :src="`/storage/${scrapeRun.data.recording}`" type="video/webm" />
+            </video>
+
             <div ref="vncContainer" class="w-full h-screen mt-2"></div>
             <canvas ref="screenshotCanvas" class="hidden"></canvas>
             <div v-for="screenshot in screenshots">
