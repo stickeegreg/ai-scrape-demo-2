@@ -49,9 +49,15 @@ class ScrapeRun extends Model
             $this->data = $data;
             $this->save();
 
-            $scrapeStrategy->scrape($this);
+            $result = $scrapeStrategy->scrape($this);
 
-            $this->update(['status' => 'completed']);
+            $this->refresh();
+            $data = $this->data;
+            $data['result'] = $result;
+            $this->data = $data;
+            $this->status = 'completed';
+            $this->save();
+
             $progressReporter->reportComplete();
         } catch (Exception $e) {
             $this->status = 'failed';

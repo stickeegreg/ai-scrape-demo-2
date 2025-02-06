@@ -4,6 +4,7 @@ namespace App\ScrapeStrategies;
 
 use Anthropic;
 use App\CommandExecutors\RemoteCommandExecutor;
+use App\DataRepository;
 use App\Models\ScrapeRun;
 use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategyInterface;
@@ -31,30 +32,14 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
     {
         dump($scrapeRun->scrape->url);
         $commandExecutor = new RemoteCommandExecutor('localhost:3000'); // TODO take from config
+        $dataRepository = new DataRepository();
         $toolCollection = ToolCollection::create([
             new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
-            new SaveTextTool(),
+            new SaveTextTool($dataRepository),
         ]);
 
-        // $commandExecutor->execute('DISPLAY=:1 google-chrome-stable \
-        //     --no-sandbox \
-        //     --disable-dev-shm-usage \
-        //     --disable-gpu \
-        //     --disable-software-rasterizer \
-        //     --disable-extensions \
-        //     --no-first-run \
-        //     --no-default-browser-check \
-        //     --remote-debugging-port=9222 \
-        //     --disable-background-networking \
-        //     --disable-background-timer-throttling \
-        //     --disable-backgrounding-occluded-windows \
-        //     --disable-client-side-phishing-detection \
-        //     --disable-crash-reporter \
-        //     --disable-features=Translate,MediaRouter \
-        //     --mute-audio \
-        //     --disable-sync \
-        //     ' . escapeshellarg($scrapeRun->scrape->url)
-        //     . ' &');
+        $commandExecutor->execute('/home/stickee/start_recording.sh');
+        $commandExecutor->execute('/home/stickee/start_chrome.sh ' . escapeshellarg($scrapeRun->scrape->url));
 
         // wait for the page to load
         // TODO: this should be done better
@@ -137,7 +122,12 @@ When you have them, use the save_text tool to save each one individually.',
                 'tools' => $tools,
             ]);
 
-            dump($result->content);
+            if ($result->stop_reason === 'end_turn') {
+                $commandExecutor->execute('/home/stickee/stop_recording.sh');
+
+                // TODO check if we have all the data we need
+                return $dataRepository->getData();
+            }
 
             if ($result->stop_reason !== 'tool_use') {
                 throw new Exception('Unexpected stop reason: ' . $result->stop_reason);
@@ -224,7 +214,9 @@ When you have them, use the save_text tool to save each one individually.',
             }
         }
 
-        return [];
+        $commandExecutor->execute('/home/stickee/stop_recording.sh');
+
+        return $dataRepository->getData();
     }
 
     public function getNoVncAddress(): string

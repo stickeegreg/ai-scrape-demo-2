@@ -8,8 +8,8 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="bg-blue-200 p-2">
-        <div v-for="message in messages" class="mt-4 p-2 rounded" :class="{'bg-white': message.role === 'assistant', 'bg-blue-100': message.role === 'user', 'text-right': message.role === 'user'}">
+    <div class="bg-blue-200 p-2 rounded">
+        <div v-for="message in messages" class="mt-4 first:mt-0 p-2 rounded" :class="{'bg-white': message.role === 'assistant', 'bg-blue-100': message.role === 'user', 'text-right': message.role === 'user'}">
             <div v-for="content in message.content" class="mt-1">
                 <img v-if="content.type === 'image'" class="inline" :src="`data:${content.source.media_type};${content.source.type},${content.source.data}`" />
                 <div v-else-if="content.type === 'text'">{{ content.text }}</div>

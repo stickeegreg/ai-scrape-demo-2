@@ -92,6 +92,11 @@ onMounted(async () => {
                 <div class="bg-red-200 p-2 rounded">{{ scrapeRun.data.error }}</div>
             </div>
 
+            <div v-if="scrapeRun.data.result" class="mt-2">
+                <h2 class="text-2xl font-bold text-gray-900">Result</h2>
+                <pre class="bg-gray-200 p-2 rounded">{{ JSON.stringify(scrapeRun.data.result, null, 2) }}</pre>
+            </div>
+
             <div class="mt-2">
                 <ActionButton @click="viewOnly = !viewOnly" :label="viewOnly ? 'Enable Control' : 'View Only'" class="mr-2" />
                 <ActionButton @click="screenshot" label="Capture Screenshot" />

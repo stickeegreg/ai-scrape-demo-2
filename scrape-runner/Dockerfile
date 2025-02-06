@@ -46,6 +46,7 @@ RUN apt-get update && \
         sudo add-apt-repository ppa:mozillateam/ppa && \
         sudo apt-get install -y --no-install-recommends \
         libreoffice \
+        ffmpeg \
         firefox-esr \
         google-chrome-stable \
         x11-apps \
