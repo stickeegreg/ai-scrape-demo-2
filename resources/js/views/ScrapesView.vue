@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { api } from '../include/api';
-import { scrapeStrategies } from '../include/scrape-ais';
+import { scrapeStrategies } from '../include/scrape-strategies';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import LinkTo from '../components/LinkTo.vue';
 
@@ -72,7 +72,7 @@ const runScrape = async (scrape) => {
                         <td class="p-4 border-b border-blue-gray-50">{{ scrape.id }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrape.website.name }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrape.scrape_type.name }}</td>
-                        <td class="p-4 border-b border-blue-gray-50">{{ scrapeStrategies[scrape.class] }}</td>
+                        <td class="p-4 border-b border-blue-gray-50">{{ scrapeStrategies[scrape.strategy] }}</td>
                         <td class="p-4 border-b border-blue-gray-50">
                             <LinkTo class="pr-2" :to="`/scrapes/${scrape.id}`">Edit</LinkTo>
                             <LinkTo variant="danger" class="pr-2" @click.prevent="deleteScrape(scrape)">Delete</LinkTo>

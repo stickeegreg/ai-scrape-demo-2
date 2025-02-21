@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\ScrapeStrategies\ScrapeStrategyInterface;
+use App\ScrapeStrategies\ScrapeStrategy;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateScrapeRequest extends FormRequest
@@ -27,14 +27,12 @@ class CreateScrapeRequest extends FormRequest
             'scrape_type_id' => ['required', 'integer', 'exists:scrape_types,id'],
             'url' => ['required', 'string', 'url'],
             'prompt' => ['present', 'string'],
-            'class' => [
+            'strategy' => [
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
-                    if (!class_exists($value)) {
-                        $fail("The {$attribute} must be a valid class.");
-                    } elseif (!is_subclass_of($value, ScrapeStrategyInterface::class)) {
-                        $fail("The {$attribute} must extend ScrapeStrategyInterface.");
+                    if (!ScrapeStrategy::tryFrom($value)) {
+                        $fail("The {$attribute} must be a valid ScrapeStrategy.");
                     }
                 },
             ],

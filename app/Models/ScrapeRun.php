@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Scrape;
 use App\ProgressReporters\ProgressReporterInterface;
+use App\ScrapeStrategies\ScrapeStrategy;
+use App\ScrapeStrategies\ScrapeStrategyFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,7 +45,9 @@ class ScrapeRun extends Model
         try {
             $this->update(['status' => 'running']);
 
-            $scrapeStrategy = $this->scrape->class::factory($progressReporter);
+            $scrapeStrategyFactory = new ScrapeStrategyFactory();
+
+            $scrapeStrategy = $scrapeStrategyFactory->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter);
             $data = $this->data;
             $data['no_vnc_address'] = $scrapeStrategy->getNoVncAddress();
             $this->data = $data;

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('scrape_type_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->string('url', 2048);
             $table->text('prompt');
-            $table->string('class');
+            $table->string('strategy');
             $table->timestamps();
         });
     }

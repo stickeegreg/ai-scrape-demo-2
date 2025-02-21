@@ -3,7 +3,7 @@ import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '../include/api';
 import { ValidationError } from '../include/validation-error';
-import { scrapeStrategies } from '../include/scrape-ais';
+import { scrapeStrategies } from '../include/scrape-strategies';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
 import SelectInput from '../components/SelectInput.vue';
@@ -27,7 +27,7 @@ const scrape = ref(null);
 const saving = ref(false);
 const websites = ref([]);
 const scrapeTypes = ref([]);
-const classOptions = Object.entries(scrapeStrategies).map(([key, value]) => ({ value: key, label: value }));
+const strategyOptions = Object.entries(scrapeStrategies).map(([key, value]) => ({ value: key, label: value }));
 
 watch(
   () => route.params.id,
@@ -167,12 +167,12 @@ const saveScrape = async () => {
                     type="textarea"
                 />
                 <SelectInput
-                    name="class"
+                    name="strategy"
                     label="AI Type"
-                    v-model="scrape.class"
-                    :error="errors?.class?.[0]"
+                    v-model="scrape.strategy"
+                    :error="errors?.strategy?.[0]"
                     required
-                    :options="classOptions"
+                    :options="strategyOptions"
                 />
                 <div class="flex items-center justify-between">
                     <ActionButton label="Save" type="submit" :disabled="saving" />

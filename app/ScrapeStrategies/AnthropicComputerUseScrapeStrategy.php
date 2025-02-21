@@ -16,20 +16,12 @@ use Illuminate\Support\Facades\Storage;
 
 class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 {
-    public static function factory(ProgressReporterInterface $progressReporter): ScrapeStrategyInterface
-    {
-        // TODO: this should take a server from the pool
-        $server = config('scrape.servers')[0];
-        return new self($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
-    }
-
     public function __construct(
         private ProgressReporterInterface $progressReporter,
         private string $apiKey,
         private string $noVncAddress,
         private string $controlServiceAddress
     ) {
-        dd($this);
     }
 
     public function scrape(ScrapeRun $scrapeRun): array

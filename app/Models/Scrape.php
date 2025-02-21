@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Scrape extends Model
 {
-    protected $fillable = ['website_id', 'scrape_type_id', 'url', 'prompt', 'class'];
+    protected $fillable = ['website_id', 'scrape_type_id', 'url', 'prompt', 'strategy'];
 
     public function website()
     {
