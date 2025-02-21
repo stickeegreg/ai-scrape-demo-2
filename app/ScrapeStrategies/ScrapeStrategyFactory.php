@@ -20,8 +20,8 @@ class ScrapeStrategyFactory
             case ScrapeStrategy::OpenAIO1WithAnthropicComputerUse:
                 return new OpenAIO1WithAnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
 
-            case ScrapeStrategy::OpenAIGPT4oTurboWithAnthropicComputerUse:
-                return new OpenAIGPT4oTurboWithAnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
+            case ScrapeStrategy::OpenAIGPT4oMiniWithAnthropicComputerUse:
+                return new OpenAIGPT4oMiniWithAnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
 
             default:
                 throw new Exception("Unknown scrape strategy: $scrapeStrategy");

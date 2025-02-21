@@ -2,5 +2,5 @@
 export const scrapeStrategies = {
     'AnthropicComputerUse': 'Anthropic Computer Use',
     'OpenAIO1WithAnthropicComputerUse': 'OpenAI O1 with Anthropic Computer Use',
-    'OpenAIGPT4oTurboWithAnthropicComputerUse': 'OpenAI GPT-4o Turbo with Anthropic Computer Use',
+    'OpenAIGPT4oMiniWithAnthropicComputerUse': 'OpenAI GPT-4o Mini with Anthropic Computer Use',
 };
