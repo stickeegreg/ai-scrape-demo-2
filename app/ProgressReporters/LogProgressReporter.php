@@ -2,14 +2,13 @@
 
 namespace App\ProgressReporters;
 
-use Illuminate\Console\OutputStyle;
 use Illuminate\Support\Facades\Log;
 
 class LogProgressReporter implements ProgressReporterInterface
 {
     private float $startTime;
 
-    public function __construct(private OutputStyle $output)
+    public function __construct()
     {
         $this->startTime = microtime(true);
     }

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\ScrapeRun;
+use App\ProgressReporters\LogProgressReporter;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -23,6 +24,6 @@ class ScrapeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->scrapeRun->run();
+        $this->scrapeRun->run(new LogProgressReporter());
     }
 }

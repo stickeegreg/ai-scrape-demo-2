@@ -29,6 +29,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         private string $noVncAddress,
         private string $controlServiceAddress
     ) {
+        dd($this);
     }
 
     public function scrape(ScrapeRun $scrapeRun): array
