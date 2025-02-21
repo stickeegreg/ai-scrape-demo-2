@@ -96,17 +96,14 @@ When you have them, use the save_text tool to save each one individually.',
             ],
         ];
 
+        $scrapeRun->updateMessages($messages);
+
         $i = 0;
         $maxRequests = 5; // TODO
 
         while ($i < $maxRequests) {
             echo "\n\n---------------------------------------------------------------------------\n\n";
             $i++;
-
-            $data = $scrapeRun->data;
-            $data['messages'] = $messages;
-            $scrapeRun->data = $data;
-            $scrapeRun->save();
 
             // TODO enable caching
             $result = $client->messages()->create([
@@ -119,6 +116,16 @@ When you have them, use the save_text tool to save each one individually.',
             ]);
 
             if ($result->stop_reason === 'end_turn') {
+                $messages[] = [
+                    'role' => 'assistant',
+                    'content' => [
+                        'type' => 'text',
+                        'text' => 'Finished (stop_reason: end_turn)',
+                    ],
+                ];
+
+                $scrapeRun->updateMessages($messages);
+
                 break;
             }
 
@@ -139,10 +146,7 @@ When you have them, use the save_text tool to save each one individually.',
                 }, $result->content),
             ];
 
-            $data = $scrapeRun->data;
-            $data['messages'] = $messages;
-            $scrapeRun->data = $data;
-            $scrapeRun->save();
+            $scrapeRun->updateMessages($messages);
 
             $toolResultContent = [];
 
@@ -204,10 +208,15 @@ When you have them, use the save_text tool to save each one individually.',
                     'role' => 'user',
                     'content' => $toolResultContent,
                 ];
+
+                $scrapeRun->updateMessages($messages);
             }
         }
 
         $commandExecutor->execute('/home/stickee/stop_recording.sh');
+
+        // TODO: Let the recording finish, do this a better way
+        sleep(2);
 
         Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://' . $this->controlServiceAddress . '/get-recording'));
 

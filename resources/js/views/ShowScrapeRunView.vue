@@ -80,7 +80,7 @@ onMounted(async () => {
         <div v-else>
             <div class="p-2 mb-2">
                 Status:
-                <span class="p-2 rounded text-white font-bold" :class="{'bg-grey-400': (scrapeRun.status !== 'failed') && (scrapeRun.status !== 'completed'), 'bg-red-600': scrapeRun.status === 'failed', 'bg-green-600': scrapeRun.status === 'completed'}">
+                <span class="p-2 rounded text-white font-bold" :class="{'bg-gray-400': (scrapeRun.status !== 'failed') && (scrapeRun.status !== 'completed'), 'bg-red-600': scrapeRun.status === 'failed', 'bg-green-600': scrapeRun.status === 'completed'}">
                     {{ scrapeRun.status }}
                 </span>
             </div>
