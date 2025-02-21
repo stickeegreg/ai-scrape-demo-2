@@ -18,21 +18,23 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 {
     public static function factory(ProgressReporterInterface $progressReporter): ScrapeStrategyInterface
     {
-        // TODO: this should take a VNC server address from the pool
-        return new self($progressReporter, config('scrape.anthropic.api_key'), config('scrape.no_vnc_addresses')[0]);
+        // TODO: this should take a server from the pool
+        $server = config('scrape.servers')[0];
+        return new self($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
     }
 
     public function __construct(
         private ProgressReporterInterface $progressReporter,
         private string $apiKey,
-        private string $noVncAddress
+        private string $noVncAddress,
+        private string $controlServiceAddress
     ) {
     }
 
     public function scrape(ScrapeRun $scrapeRun): array
     {
         dump($scrapeRun->scrape->url);
-        $commandExecutor = new RemoteCommandExecutor('localhost:3000'); // TODO take from config
+        $commandExecutor = new RemoteCommandExecutor($this->controlServiceAddress);
         $dataRepository = new DataRepository();
         $toolCollection = ToolCollection::create([
             new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
@@ -214,7 +216,7 @@ When you have them, use the save_text tool to save each one individually.',
 
         $commandExecutor->execute('/home/stickee/stop_recording.sh');
 
-        Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://localhost:3000/get-recording'));
+        Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://' . $this->controlServiceAddress . '/get-recording'));
 
         $data = $scrapeRun->data;
         $data['recording'] = 'recording-' . $scrapeRun->id . '.webm';

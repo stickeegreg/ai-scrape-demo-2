@@ -5,7 +5,7 @@ namespace App\CommandExecutors;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
-class RemoteCommandExecutor implements CommandExecutorInterface
+class LocalCommandExecutor implements CommandExecutorInterface
 {
     public function execute(string $command): CommandResult
     {
