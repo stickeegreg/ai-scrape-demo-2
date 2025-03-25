@@ -8,6 +8,7 @@ import LinkTo from '../components/LinkTo.vue';
 const loading = ref(true);
 const error = ref(null);
 const scrapes = ref([]);
+const startingRun = ref(false);
 
 onMounted(async () => {
     loading.value = true;
@@ -40,12 +41,16 @@ const deleteScrape = async (scrape) => {
 };
 
 const runScrape = async (scrape) => {
+    startingRun.value = true;
+
     try {
         await api.runScrape(scrape.id);
     } catch (error) {
         console.error(error);
         error.value = error.message;
         alert(`Failed to run scrape "${scrape.id}".`);
+    } finally {
+        startingRun.value = false;
     }
 };
 </script>
@@ -76,7 +81,7 @@ const runScrape = async (scrape) => {
                         <td class="p-4 border-b border-blue-gray-50">
                             <LinkTo class="pr-2" :to="`/scrapes/${scrape.id}`">Edit</LinkTo>
                             <LinkTo variant="danger" class="pr-2" @click.prevent="deleteScrape(scrape)">Delete</LinkTo>
-                            <LinkTo @click.prevent="runScrape(scrape)">Run</LinkTo>
+                            <LinkTo @click.prevent="runScrape(scrape)" :class="{'opacity-50 cursor-not-allowed': startingRun }">Run</LinkTo>
                         </td>
                     </tr>
                 </tbody>

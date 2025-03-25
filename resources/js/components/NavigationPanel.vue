@@ -3,7 +3,7 @@ import LinkTo from '../components/LinkTo.vue';
 </script>
 
 <template>
-    <nav class="bg-white shadow-md rounded px-8 pt-6 pb-8 mr-4">
+    <nav class="bg-white shadow-md rounded px-8 pt-6 pb-8 mr-4 sticky top-0">
         <LinkTo class="block" to="/">Dashboard</LinkTo>
         <LinkTo class="block" to="/websites">Websites</LinkTo>
         <LinkTo class="block" to="/scrape-types">Scrape Types</LinkTo>

@@ -11,7 +11,9 @@
         @endif
     </head>
     <body class="font-sans antialiased" id="app">
-        <div class="hidden">No manifest.json or hot file found.</div>
+        @if (!file_exists(public_path('build/manifest.json')) && !file_exists(public_path('hot')))
+            <div>No manifest.json or hot file found.</div>
+        @endif
         <app />
     </body>
 </html>

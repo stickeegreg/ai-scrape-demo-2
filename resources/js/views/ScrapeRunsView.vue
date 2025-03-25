@@ -55,7 +55,7 @@ onUnmounted(() => {
 });
 
 const deleteScrapeRun = async (scrapeRun) => {
-    if (!confirm(`Are you sure you want to delete the scrapeRun "${scrapeRun.name}"?`)) {
+    if (!confirm(`Are you sure you want to delete the scrapeRun "${scrapeRun.id}"?`)) {
         return;
     }
 
@@ -65,7 +65,7 @@ const deleteScrapeRun = async (scrapeRun) => {
     } catch (error) {
         console.error(error);
         error.value = error.message;
-        alert(`Failed to delete the scrapeRun "${scrapeRun.name}".`);
+        alert(`Failed to delete the scrapeRun "${scrapeRun.id}".`);
     }
 };
 </script>
@@ -98,7 +98,7 @@ const deleteScrapeRun = async (scrapeRun) => {
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeStrategies[scrapeRun.scrape.strategy] }}</td>
                         <td class="p-4 border-b border-blue-gray-50">{{ scrapeRun.status }}</td>
                         <td class="p-4 border-b border-blue-gray-50">
-                            <LinkTo class="pr-2" :to="`/scrape-runs/${scrapeRun.id}`">Edit</LinkTo>
+                            <LinkTo class="pr-2" :to="`/scrape-runs/${scrapeRun.id}`">View</LinkTo>
                             <LinkTo @click.prevent="deleteScrapeRun(scrapeRun)">Delete</LinkTo>
                         </td>
                     </tr>

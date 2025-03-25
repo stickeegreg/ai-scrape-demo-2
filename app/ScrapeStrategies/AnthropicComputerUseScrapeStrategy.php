@@ -71,6 +71,9 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         * When viewing a page it can be helpful to zoom out so that you can see everything on the page.  Either that, or make sure you scroll down to see everything before deciding something isn't available.
         * When using your computer function calls, they take a while to run and send back to you.  Where possible/feasible, try to chain multiple of these calls all into one function calls request.
         </SYSTEM_CAPABILITY>
+
+        Close all modal dialogs (popups) before proceeding with any actions. For example, click ACCEPT, X or CLOSE.
+        You may need to scroll up or down to see products or buttons.
         TEXT;
 
         $messages = [
@@ -87,10 +90,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                     ],
                     [
                         'type' => 'text',
-                        'text' => 'Your task is to get article titles from the https://zebra-north.com website.
-The website is already loaded in Chrome.
-Please browse to the c++ articles page and get the title of the first 5 articles.
-When you have them, use the save_text tool to save each one individually.',
+                        'text' => $scrapeRun->scrape->scrapeType->prompt . "\n\n" . $scrapeRun->scrape->prompt . "\n\n" . $scrapeRun->scrape->website->prompt,
                     ],
                 ],
             ],
@@ -99,10 +99,15 @@ When you have them, use the save_text tool to save each one individually.',
         $scrapeRun->updateMessages($messages);
 
         $i = 0;
-        $maxRequests = 5; // TODO
+        $maxRequests = 15; // TODO
 
-        while ($i < $maxRequests) {
+        while (true) {
             echo "\n\n---------------------------------------------------------------------------\n\n";
+
+            if ($i === $maxRequests) {
+                throw new Exception('Reached max requests: ' . $maxRequests);
+            }
+
             $i++;
 
             // TODO enable caching

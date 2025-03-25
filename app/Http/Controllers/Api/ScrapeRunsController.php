@@ -61,6 +61,8 @@ class ScrapeRunsController extends Controller
      */
     public function destroy(ScrapeRun $scrapeRun)
     {
-        //
+        $scrapeRun->delete();
+
+        return ['id' => $scrapeRun->id];
     }
 }
