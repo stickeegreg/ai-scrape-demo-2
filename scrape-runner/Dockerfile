@@ -104,6 +104,10 @@ WORKDIR $HOME
 COPY --chown=$USERNAME:$USERNAME image/ $HOME
 # COPY --chown=$USERNAME:$USERNAME computer_use_demo/ $HOME/computer_use_demo/
 
+# Unzip Hatchery
+RUN mkdir -p $HOME/hatchery && \
+    unzip $HOME/hatchery.zip -d $HOME/hatchery
+
 RUN cd $HOME/screenshot-service && \
     npm install
 

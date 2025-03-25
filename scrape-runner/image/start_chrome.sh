@@ -3,11 +3,9 @@
 export DISPLAY=:${DISPLAY_NUM}
 
 nohup google-chrome-stable \
-    --no-sandbox \
     --disable-dev-shm-usage \
     --disable-gpu \
     --disable-software-rasterizer \
-    --disable-extensions \
     --no-first-run \
     --no-default-browser-check \
     --remote-debugging-port=9222 \
@@ -19,6 +17,7 @@ nohup google-chrome-stable \
     --disable-features=Translate,MediaRouter \
     --mute-audio \
     --disable-sync \
+    --load-extension=/home/stickee/hatchery \
     "$1" \
     > /tmp/chrome.log 2>&1 \
     &
