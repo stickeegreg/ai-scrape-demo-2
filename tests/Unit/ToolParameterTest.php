@@ -52,7 +52,7 @@ class ToolParameterTest extends TestCase
             json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'int')))] array $x) => null)))
         );
         $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['null', 'boolean']], 'description' => 'desc']], 'required' => ['x']]),
+            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['boolean', 'null']], 'description' => 'desc']], 'required' => ['x']]),
             json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'bool')))] array $x) => null)))
         );
         $this->assertEquals(

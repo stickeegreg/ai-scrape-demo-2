@@ -4,9 +4,6 @@ namespace Tests\Fixtures;
 
 use App\Tools\Attributes\ToolProperty;
 use App\Tools\JsonSchema\JsonSchemaArray;
-use App\Tools\JsonSchema\JsonSchemaNumber;
-use App\Tools\JsonSchema\JsonSchemaString;
-use App\Tools\JsonSchema\JsonSchemaUnion;
 
 class SampleObject
 {
@@ -19,10 +16,10 @@ class SampleObject
     #[ToolProperty('The description of the object')]
     public ?string $description = null;
 
-    #[ToolProperty('An array of strings', new JsonSchemaArray(new JsonSchemaString()))]
+    #[ToolProperty('An array of strings', new JsonSchemaArray('string'))]
     public array $data = [];
 
-    #[ToolProperty('An array of strings', new JsonSchemaArray(new JsonSchemaUnion([new JsonSchemaString(), new JsonSchemaNumber())), 'An array of strings'))]
+    #[ToolProperty('An array of strings or numbers', new JsonSchemaArray('string|int'))]
     public array $data2 = [];
 
     #[ToolProperty('The status of the object')]
