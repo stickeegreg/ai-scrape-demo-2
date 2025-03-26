@@ -3,11 +3,13 @@
 namespace App\Tools\JsonSchema;
 
 use App\Tools\Attributes\ToolParameter;
+use Closure;
 use Exception;
 use InvalidArgumentException;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionParameter;
 use ReflectionType;
 use ReflectionUnionType;
 
@@ -83,11 +85,9 @@ class JsonSchema
 
             $toolParameter = $parameterAttributes[0]->newInstance();
             $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
+            $type->setDescription($toolParameter->description);
 
-            $properties[$parameter->getName()] = (object) [
-                "type" => $type->jsonSerialize(),
-                "description" => $toolParameter->description,
-            ];
+            $properties[$parameter->getName()] = $type->jsonSerialize();
 
             if (!$parameter->isOptional()) {
                 $required[] = $parameter->getName();
@@ -100,32 +100,29 @@ class JsonSchema
             "required" => $required,
         ];
 
-
-        // dump($inputSchema);
-
         return $inputSchema;
     }
 
-    public static function fromFunction(ReflectionFunction $function): object
+    public static function fromFunction(Closure|string $function): object
     {
-        $parameters = $function->getParameters();
+        $reflectionFunction = new ReflectionFunction($function);
+        $parameters = $reflectionFunction->getParameters();
 
         $properties = [];
         $required = [];
 
         foreach ($parameters as $parameter) {
             if ($parameter->isVariadic()) {
-                throw new Exception("Variadic parameters are not supported: " . $function->getName() . '() parameter $' . $parameter->getName());
+                throw new Exception("Variadic parameters are not supported: " . $reflectionFunction->getName() . '() parameter $' . $parameter->getName());
             }
 
             $parameterAttributes = $parameter->getAttributes(ToolParameter::class);
 
             if ($parameterAttributes === []) {
-                throw new Exception("Missing ToolParameter attribute for: " . $function->getName() . '() parameter $' . $parameter->getName());
+                throw new Exception("Missing ToolParameter attribute for: " . $reflectionFunction->getName() . '() parameter $' . $parameter->getName());
             }
 
             $toolParameter = $parameterAttributes[0]->newInstance();
-
             $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
             $type->setDescription($toolParameter->description);
 
@@ -142,30 +139,6 @@ class JsonSchema
             "required" => $required,
         ];
 
-
-        // dump($inputSchema);
-
         return $inputSchema;
     }
 }
-
-// enum JsonSchemaType: string {
-//     case ARRAY = 'array';
-//     case BOOLEAN = 'boolean';
-//     case NULL = 'null';
-//     case NUMBER = 'number';
-//     case OBJECT = 'object';
-//     case STRING = 'string';
-
-//     public static function fromPhpType(string $phpType): JsonSchemaType {
-//         return match ($phpType) {
-//             'array' => self::ARRAY,
-//             'bool' => self::BOOLEAN,
-//             'float', 'int' => self::NUMBER,
-//             'null' => self::NULL,
-//             'object' => self::OBJECT,
-//             'string' => self::STRING,
-//             default => throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
-//         };
-//     }
-// }

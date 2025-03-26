@@ -40,15 +40,12 @@ class JsonSchemaObject extends AbstractJsonSchemaType
 
             if ($toolProperty->type !== null) {
                 $propertyType = $toolProperty->type;
-                // dump($toolProperty);
             } else {
                 if ($property->getType() === null) {
                     throw new Exception("Property $propertyName does not have a type");
                 }
 
-                // dump($property->getType());
                 $propertyType = JsonSchema::fromPhpType($property->getType());
-                // dump($propertyType);
             }
 
             $propertiesSchema[$propertyName] = $propertyType->jsonSerialize();
