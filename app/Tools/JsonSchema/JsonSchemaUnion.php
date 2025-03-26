@@ -10,13 +10,13 @@ class JsonSchemaUnion extends AbstractJsonSchemaType
     private array $types;
 
     public function __construct(
-        JsonSchemaType ...$types
+        JsonSchemaType|string ...$types
     ) {
         if ($types === []) {
             throw new InvalidArgumentException("Union must have at least one type");
         }
 
-        $this->types = $types;
+        $this->types = array_map(fn($type) => is_string($type) ? JsonSchema::fromPhpType($type) : $type, $types);
     }
 
     public function jsonSerialize(): mixed

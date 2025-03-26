@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tools;
+namespace Tests\Fixtures;
 
 use App\Tools\Attributes\ToolProperty;
 use App\Tools\JsonSchema\JsonSchemaArray;
@@ -8,7 +8,7 @@ use App\Tools\JsonSchema\JsonSchemaNumber;
 use App\Tools\JsonSchema\JsonSchemaString;
 use App\Tools\JsonSchema\JsonSchemaUnion;
 
-class TestObject
+class SampleObject
 {
     #[ToolProperty('The name of the object')]
     public string|int $name = 'TestObject';

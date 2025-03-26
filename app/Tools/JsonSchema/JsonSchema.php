@@ -17,15 +17,27 @@ class JsonSchema
     public static function fromPhpType(string|ReflectionType $phpType): JsonSchemaType
     {
         if (is_string($phpType)) {
-            return match ($phpType) {
-                // 'array' => new JsonSchemaArray(),
-                'bool' => new JsonSchemaBoolean(),
-                'float', 'int' => new JsonSchemaNumber(),
-                'null' => new JsonSchemaNull(),
-                // 'object' => new JsonSchemaObject(),
-                'string' => new JsonSchemaString(),
-                default => throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
-            };
+            $rawPhpType = preg_replace('/^\s*\?\s*/', '', $phpType);
+            $isNullable = $rawPhpType !== $phpType;
+            $types = [];
+
+            if ($isNullable) {
+                $types[] = new JsonSchemaNull();
+            }
+
+            foreach (explode('|', $rawPhpType) as $type) {
+                $types[] = match (mb_trim($type)) {
+                    // 'array' => new JsonSchemaArray(),
+                    'bool' => new JsonSchemaBoolean(),
+                    'float', 'int' => new JsonSchemaNumber(),
+                    'null' => new JsonSchemaNull(),
+                    // 'object' => new JsonSchemaObject(),
+                    'string' => new JsonSchemaString(),
+                    default => class_exists($type) ? new JsonSchemaObject($type) : throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
+                };
+            }
+
+            return count($types) === 1 ? $types[0] : new JsonSchemaUnion(...$types);
         }
 
         if ($phpType->allowsNull()) {
@@ -70,7 +82,7 @@ class JsonSchema
             }
 
             $toolParameter = $parameterAttributes[0]->newInstance();
-            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType()->getName());
+            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
 
             $properties[$parameter->getName()] = (object) [
                 "type" => $type->jsonSerialize(),
@@ -113,7 +125,8 @@ class JsonSchema
             }
 
             $toolParameter = $parameterAttributes[0]->newInstance();
-            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType()->getName());
+
+            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
             $type->setDescription($toolParameter->description);
 
             $properties[$parameter->getName()] = $type->jsonSerialize();
