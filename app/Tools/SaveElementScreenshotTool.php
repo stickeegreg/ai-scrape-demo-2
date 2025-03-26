@@ -3,38 +3,20 @@
 namespace App\Tools;
 
 use App\DataRepository;
-use Exception;
+use App\Tools\Attributes\ToolMethod;
 
 class SaveElementScreenshotTool implements ToolInterface
 {
-    public static function getName(): string
-    {
-        return "save_element_screenshot";
-    }
-
-    public static function getDescription(): string
-    {
-        return "Save a screenshot of an element.";
-    }
-
-    public static function getInputSchema(): object
-    {
-        return (object) [
-            "type" => "object",
-            "properties" => (object) [],
-            "required" => [],
-        ];
-    }
-
     public function __construct(
         private DataRepository $dataRepository
     ) {
     }
 
-    public function run(array $args): ToolResult
+    #[ToolMethod('Save a screenshot of an element.', 'save_element_screenshot')]
+    public function saveElementScreenshot(): ToolResult
     {
-        dump('GOT SCREENSHOT TO SAVE:', $args);
-        // $this->dataRepository->addScreenshot($text);
+        dump('GOT SCREENSHOT TO SAVE FOR ELEMENT:');
+        // $this->dataRepository->addScreenshot($elementId);
 
         return new ToolResult();
     }
