@@ -2,115 +2,76 @@
 
 namespace App\Tools;
 
-use App\Tools\Attributes\JsonSchemaType;
 use App\Tools\Attributes\ToolMethod;
-use App\Tools\Attributes\ToolParameter;
 use App\Tools\JsonSchema\JsonSchema;
 use Exception;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
+use ReflectionMethod;
 
-class ToolCollection extends Collection
+class ToolCollection
 {
-    /**
-     * Create a new collection.
-     *
-     * @param  \Illuminate\Contracts\Support\Arrayable<TKey, \App\Tools\ToolInterface>|iterable<TKey, \App\Tools\ToolInterface>|null  $items
-     * @return self<TKey, \App\Tools\ToolInterface>
-     */
-    public static function create($items = [])
+    private array $items = [];
+
+    public function __construct(array $items)
     {
-        $newItems = [];
-
-        // foreach ($items as $item) {
-        //     // $newItems[$item->getName()] = $item;
-
-        //     $reflectionClass = new ReflectionClass($item);
-        //     $methods = $reflectionClass->getMethods();
-
-
-        //     foreach ($methods as $method) {
-        //         $attributes = $method->getAttributes(ToolMethod::class);
-
-        //         if ($attributes === []) {
-        //             continue;
-        //         }
-
-        //         $parameters = $method->getParameters();
-
-        //         /*
-        //                 return (object) [
-        //     "type" => "object",
-        //     "properties" => (object) [
-        //         "text" => (object) [
-        //             "type" => "string",
-        //             "description" => "The text to save.",
-        //         ],
-        //     ],
-        //     "required" => ["text"],
-        // ];
-        // */
-
-        //         $properties = [];
-        //         $required = [];
-
-        //         foreach ($parameters as $parameter) {
-        //             if ($parameter->isVariadic()) {
-        //                 throw new Exception("Variadic parameters are not supported: " . get_class($item) . '::' . $method->getName() . '() parameter $' . $parameter->getName());
-        //             }
-
-        //             $parameterAttributes = $parameter->getAttributes(ToolParameter::class);
-
-        //             if ($parameterAttributes === []) {
-        //                 throw new Exception("Missing ToolParameter attribute for: " . get_class($item) . '::' . $method->getName() . '() parameter $' . $parameter->getName());
-        //             }
-
-        //             $toolParameter = $parameterAttributes[0]->newInstance();
-        //             $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType()->getName());
-
-        //             $properties[$parameter->getName()] = (object) [
-        //                 "type" => $type->jsonSerialize(),
-        //                 "description" => $toolParameter->description,
-        //             ];
-
-        //             if (!$parameter->isOptional()) {
-        //                 $required[] = $parameter->getName();
-        //             }
-        //         }
-
-        //         $inputSchema = (object) [
-        //             "type" => "object",
-        //             "properties" => (object) $properties,
-        //             "required" => $required,
-        //         ];
-
-
-        //         // dump($inputSchema);
-        //     }
-        // }
-
-
-
-        dd('xxxxxxxx');
-
-        return new self($newItems);
+        foreach ($items as $item) {
+            $this->register($item);
+        }
     }
 
-    public function run(string $name, array $arguments = []): ToolResult
+    public function addItem(string $name, Tool $tool): void
     {
-        $tool = $this->get($name);
+        if (isset($this->items[$name])) {
+            throw new Exception("Tool name already exists: $name");
+        }
+
+        $this->items[$name] = $tool;
+    }
+
+    private function register(object $item): void
+    {
+        if ($item instanceof Tool) {
+            $this->addItem($item->getName(), $item);
+
+            return;
+        }
+
+        $reflectionClass = new ReflectionClass($item);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            $toolMethod = $method->getAttributes(ToolMethod::class)[0]?->newInstance();
+
+            if (!$toolMethod) {
+                continue;
+            }
+
+            $name = $toolMethod->name ?? $method->getName();
+
+            $this->addItem($name, Tool::fromMethod($item, $method));
+        }
+    }
+
+    public function handle(string $name, array $arguments = []): ToolResult
+    {
+        $tool = $this->items[$name] ?? null;
 
         if (!$tool) {
             throw new Exception("Tool not found: $name");
         }
 
         try {
-            return $tool->run($arguments);
+            return $tool->handle($arguments);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             throw $e;
             return new ToolResult(error: $e->getMessage());
         }
+    }
+
+    public function getInputSchemas(): array
+    {
+        return array_map(fn ($tool) => $tool->getInputSchema(), $this->items);
     }
 }

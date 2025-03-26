@@ -5,7 +5,7 @@ namespace App\Tools;
 use App\DataRepository;
 use App\Tools\Attributes\ToolMethod;
 
-class SaveElementScreenshotTool implements ToolInterface
+class SaveElementScreenshotTool
 {
     public function __construct(
         private DataRepository $dataRepository

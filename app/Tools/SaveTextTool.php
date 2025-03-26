@@ -9,7 +9,7 @@ use App\Tools\JsonSchema\JsonSchemaArray;
 use App\Tools\JsonSchema\JsonSchemaObject;
 use App\Tools\ToolResult;
 
-class SaveTextTool implements ToolInterface
+class SaveTextTool
 {
     public function __construct(
         private DataRepository $dataRepository

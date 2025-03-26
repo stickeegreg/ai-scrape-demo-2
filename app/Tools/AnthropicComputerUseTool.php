@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 A tool that allows the agent to interact with the screen, keyboard, and mouse of the current computer.
 The tool parameters are defined by Anthropic and are not editable.
 */
-class AnthropicComputerUseTool implements ToolInterface
+class AnthropicComputerUseTool
 {
     private string $xDoTool;
     private float $screenshotDelay = 0.5;
