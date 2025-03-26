@@ -29,7 +29,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         dump($scrapeRun->scrape->url);
         $commandExecutor = new RemoteCommandExecutor($this->controlServiceAddress);
         $dataRepository = new DataRepository();
-        $toolCollection = ToolCollection::create([
+        $toolCollection = new ToolCollection([
             new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
             new SaveTextTool($dataRepository),
         ]);
@@ -43,26 +43,13 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 
         // $toolCollection->run('computer', ['mouse_move', null, [100, 100]]);
         // $toolCollection->run('computer', ['type', 'This is a test']);
-        $screenshotResult = $toolCollection->run('computer', ['screenshot']);
+        $screenshotResult = $toolCollection->handle('computer', ['screenshot']);
 
         $client = Anthropic::factory()
             ->withApiKey(config('scrape.anthropic.api_key'))
             ->withHttpHeader('anthropic-version', '2023-06-01')
             ->withHttpHeader('anthropic-beta', 'computer-use-2024-10-22')
             ->make();
-
-        $tools = $toolCollection->map(function ($tool) {
-            // TODO do this better
-            if ($tool->getName() === 'computer') {
-                return $tool->getInputSchema();
-            }
-
-            return [
-                'name' => $tool->getName(),
-                'description' => $tool->getDescription(),
-                'input_schema' => $tool->getInputSchema(),
-            ];
-        })->values();
 
         $systemPrompt = <<<'TEXT'
         <SYSTEM_CAPABILITY>
@@ -117,7 +104,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                 'tool_choice' => ['type' => 'auto', 'disable_parallel_tool_use' => false],
                 'system' => $systemPrompt,
                 'messages' => $messages,
-                'tools' => $tools,
+                'tools' => $toolCollection->getJsonSchemas(),
             ]);
 
             if ($result->stop_reason === 'end_turn') {

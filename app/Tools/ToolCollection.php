@@ -3,7 +3,7 @@
 namespace App\Tools;
 
 use App\Tools\Attributes\ToolMethod;
-use App\Tools\JsonSchema\JsonSchema;
+use App\Tools\ToolInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
@@ -20,7 +20,7 @@ class ToolCollection
         }
     }
 
-    public function addItem(string $name, Tool $tool): void
+    public function addItem(string $name, ToolInterface $tool): void
     {
         if (isset($this->items[$name])) {
             throw new Exception("Tool name already exists: $name");
@@ -31,7 +31,7 @@ class ToolCollection
 
     private function register(object $item): void
     {
-        if ($item instanceof Tool) {
+        if ($item instanceof ToolInterface) {
             $this->addItem($item->getName(), $item);
 
             return;
@@ -39,17 +39,23 @@ class ToolCollection
 
         $reflectionClass = new ReflectionClass($item);
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+        $hasToolMethods = false;
 
         foreach ($methods as $method) {
-            $toolMethod = $method->getAttributes(ToolMethod::class)[0]?->newInstance();
+            $toolMethod = ($method->getAttributes(ToolMethod::class)[0] ?? null)?->newInstance();
 
             if (!$toolMethod) {
                 continue;
             }
 
+            $hasToolMethods = true;
             $name = $toolMethod->name ?? $method->getName();
 
             $this->addItem($name, Tool::fromMethod($item, $method));
+        }
+
+        if (!$hasToolMethods) {
+            throw new Exception('No tool methods found on ' . get_class($item));
         }
     }
 
@@ -70,7 +76,7 @@ class ToolCollection
         }
     }
 
-    public function getInputSchemas(): array
+    public function getJsonSchemas(): array
     {
         return array_map(fn ($tool) => $tool->getInputSchema(), $this->items);
     }

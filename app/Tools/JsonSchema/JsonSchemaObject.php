@@ -28,7 +28,7 @@ class JsonSchemaObject extends AbstractJsonSchemaType
         $propertiesSchema = [];
 
         foreach ($properties as $property) {
-            $toolProperty = $property->getAttributes(ToolProperty::class)[0]?->newInstance();
+            $toolProperty = ($property->getAttributes(ToolProperty::class)[0] ?? null)?->newInstance();
 
             if ($toolProperty === null) {
                 continue;

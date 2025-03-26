@@ -15,7 +15,7 @@ class Tool implements ToolInterface
         object $instance,
         ReflectionMethod $method,
     ): self {
-        $toolMethod = $method->getAttributes(ToolMethod::class)[0]?->newInstance() ?? null;
+        $toolMethod = ($method->getAttributes(ToolMethod::class)[0] ?? null)?->newInstance();
 
         $inputSchema = json_encode([
             'name' => $toolMethod->name ?? $method->getName(),

@@ -3,6 +3,7 @@
 namespace App\Tools;
 
 use App\CommandExecutors\CommandExecutorInterface;
+use App\Tools\ToolInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 A tool that allows the agent to interact with the screen, keyboard, and mouse of the current computer.
 The tool parameters are defined by Anthropic and are not editable.
 */
-class AnthropicComputerUseTool
+class AnthropicComputerUseTool implements ToolInterface
 {
     private string $xDoTool;
     private float $screenshotDelay = 0.5;
@@ -24,7 +25,7 @@ class AnthropicComputerUseTool
         $this->xDoTool = $this->displayNumber ? "DISPLAY=:{$this->displayNumber} xdotool" : 'xdotool';
     }
 
-    public static function getName(): string
+    public function getName(): string
     {
         // NOTE: This name comes from Anthropic and must not be changed.
         return "computer";
@@ -35,32 +36,20 @@ class AnthropicComputerUseTool
         return "Interact with the screen, keyboard, and mouse of the current computer.";
     }
 
-    public static function getInputSchema(): object
+    public function getInputSchema(): string
     {
         // This is a special type, not a normal tool
         // See https://docs.anthropic.com/en/docs/build-with-claude/computer-use
-        return (object) [
+        return json_encode([
             "type" => "computer_20241022",
             "name" => "computer",
-            "display_width_px" => 1024,
-            "display_height_px" => 768,
-            "display_number" => 1,
-        ];
+            "display_width_px" => $this->width,
+            "display_height_px" => $this->height,
+            "display_number" => $this->displayNumber,
+        ]);
     }
 
-    // public function getDefinition(): array
-    // {
-    //     // TODO get these properly
-    //     return [
-    //         "type" => "computer_20241022",
-    //         "name" => "computer",
-    //         "display_width_px" => $this->width,
-    //         "display_height_px" => $this->height,
-    //         "display_number" => $this->displayNumber,
-    //     ];
-    // }
-
-    public function run(array $args): ToolResult
+    public function handle(array $args): ToolResult
     {
         return $this->executeAction(...$args);
     }
