@@ -57,6 +57,7 @@ RUN apt-get update && \
         tint2 \
         galculator \
         pcmanfm \
+        psmisc \
         vim \
         unzip && \
     apt-get clean

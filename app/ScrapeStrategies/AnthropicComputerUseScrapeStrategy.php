@@ -34,6 +34,8 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
             new SaveTextTool($dataRepository),
         ]);
 
+        // dd($toolCollection->getJsonSchemas());
+
         $commandExecutor->execute('/home/stickee/start_recording.sh');
         $commandExecutor->execute('/home/stickee/start_chrome.sh ' . escapeshellarg($scrapeRun->scrape->url));
 
@@ -145,7 +147,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
             foreach ($result->content as $content) {
                 if ($content->type === 'tool_use') {
                     $this->progressReporter->reportMessage('Execute ' . $content->name, $content->input);
-                    $toolResult = $toolCollection->run($content->name, $content->input);
+                    $toolResult = $toolCollection->handle($content->name, $content->input);
 
                     if ($toolResult->error) {
                         throw new Exception($toolResult->error);

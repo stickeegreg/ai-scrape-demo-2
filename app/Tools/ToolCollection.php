@@ -78,6 +78,6 @@ class ToolCollection
 
     public function getJsonSchemas(): array
     {
-        return array_map(fn ($tool) => $tool->getInputSchema(), $this->items);
+        return array_values(array_map(fn ($tool) => $tool->getInputSchema(), $this->items));
     }
 }

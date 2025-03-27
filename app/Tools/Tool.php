@@ -17,11 +17,11 @@ class Tool implements ToolInterface
     ): self {
         $toolMethod = ($method->getAttributes(ToolMethod::class)[0] ?? null)?->newInstance();
 
-        $inputSchema = json_encode([
+        $inputSchema = (object) [
             'name' => $toolMethod->name ?? $method->getName(),
             'description' => $toolMethod->description,
             'input_schema' => JsonSchema::fromMethod($method),
-        ]);
+        ];
         $handler = $method->getClosure($instance);
 
         return new self($toolMethod->name ?? $method->getName(), $inputSchema, $handler);
@@ -29,7 +29,7 @@ class Tool implements ToolInterface
 
     public function __construct(
         private readonly string $name,
-        private readonly string $inputSchema,
+        private readonly object $inputSchema,
         private readonly Closure $handler
     ) {
     }
@@ -39,7 +39,7 @@ class Tool implements ToolInterface
         return $this->name;
     }
 
-    public function getInputSchema(): string
+    public function getInputSchema(): object
     {
         return $this->inputSchema;
     }

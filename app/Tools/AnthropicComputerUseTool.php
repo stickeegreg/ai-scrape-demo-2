@@ -5,7 +5,6 @@ namespace App\Tools;
 use App\CommandExecutors\CommandExecutorInterface;
 use App\Tools\ToolInterface;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 /*
 A tool that allows the agent to interact with the screen, keyboard, and mouse of the current computer.
@@ -36,17 +35,17 @@ class AnthropicComputerUseTool implements ToolInterface
         return "Interact with the screen, keyboard, and mouse of the current computer.";
     }
 
-    public function getInputSchema(): string
+    public function getInputSchema(): object
     {
         // This is a special type, not a normal tool
         // See https://docs.anthropic.com/en/docs/build-with-claude/computer-use
-        return json_encode([
+        return (object)[
             "type" => "computer_20241022",
             "name" => "computer",
             "display_width_px" => $this->width,
             "display_height_px" => $this->height,
             "display_number" => $this->displayNumber,
-        ]);
+        ];
     }
 
     public function handle(array $args): ToolResult
