@@ -3,7 +3,8 @@
 namespace App\Tools;
 
 use App\CommandExecutors\CommandExecutorInterface;
-use App\Tools\ToolInterface;
+use App\Tools\Utils\ToolInterface;
+use App\Tools\Utils\ToolResult;
 use Exception;
 
 /*

@@ -4,7 +4,7 @@ namespace Tests\Fixtures;
 
 use App\Tools\Attributes\ToolMethod;
 use App\Tools\Attributes\ToolParameter;
-use App\Tools\ToolResult;
+use App\Tools\Utils\ToolResult;
 
 class SampleTool
 {

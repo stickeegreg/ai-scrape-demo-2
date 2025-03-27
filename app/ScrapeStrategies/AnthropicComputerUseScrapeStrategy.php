@@ -10,7 +10,7 @@ use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategyInterface;
 use App\Tools\AnthropicComputerUseTool;
 use App\Tools\SaveTextTool;
-use App\Tools\ToolCollection;
+use App\Tools\Utils\ToolCollection;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,8 +33,6 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
             new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
             new SaveTextTool($dataRepository),
         ]);
-
-        // dd($toolCollection->getJsonSchemas());
 
         $commandExecutor->execute('/home/stickee/start_recording.sh');
         $commandExecutor->execute('/home/stickee/start_chrome.sh ' . escapeshellarg($scrapeRun->scrape->url));

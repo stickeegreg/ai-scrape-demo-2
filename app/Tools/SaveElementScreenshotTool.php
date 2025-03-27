@@ -4,6 +4,7 @@ namespace App\Tools;
 
 use App\DataRepository;
 use App\Tools\Attributes\ToolMethod;
+use App\Tools\Utils\ToolResult;
 
 class SaveElementScreenshotTool
 {

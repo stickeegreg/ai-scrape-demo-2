@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tools;
+namespace App\Tools\Utils;
 
-use App\Tools\ToolResult;
+use App\Tools\Utils\ToolResult;
 
 interface ToolInterface
 {

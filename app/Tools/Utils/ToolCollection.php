@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Tools;
+namespace App\Tools\Utils;
 
 use App\Tools\Attributes\ToolMethod;
-use App\Tools\ToolInterface;
+use App\Tools\Utils\Tool;
+use App\Tools\Utils\ToolInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;

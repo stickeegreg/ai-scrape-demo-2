@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Tools;
+namespace App\Tools\Utils;
 
 use App\Tools\Attributes\ToolMethod;
 use App\Tools\JsonSchema\JsonSchema;
-use App\Tools\ToolInterface;
-use App\Tools\ToolResult;
+use App\Tools\Utils\ToolInterface;
+use App\Tools\Utils\ToolResult;
 use Closure;
 use ReflectionMethod;
 
