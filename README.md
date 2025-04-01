@@ -32,3 +32,10 @@ php artisan queue:work
 # Run scrapes from the command line to skip the queue
 php artisan app:run-scrape 1
 ```
+
+## TODO
+
+- [ ] Gather evidence
+- [ ] Allow different tools based on the scrape type?
+- [ ] Send the scrape results to a different endpoint based on the scrape type
+- [ ] Smarter scraping - todo list in context
