@@ -6,6 +6,7 @@ use App\Tools\Attributes\ToolParameter;
 use Closure;
 use Exception;
 use InvalidArgumentException;
+use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -35,7 +36,7 @@ class JsonSchema
                     'null' => new JsonSchemaNull(),
                     // 'object' => new JsonSchemaObject(),
                     'string' => new JsonSchemaString(),
-                    default => class_exists($type) ? new JsonSchemaObject($type) : throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
+                    default => class_exists($type) ? self::fromClassName($type) : throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
                 };
             }
 
@@ -63,6 +64,21 @@ class JsonSchema
         }
 
         throw new InvalidArgumentException("Unsupported PHP type");
+    }
+
+    private static function fromClassName(string $className): JsonSchemaType
+    {
+        if (!class_exists($className)) {
+            throw new InvalidArgumentException("Class $className does not exist");
+        }
+
+        $reflection = new ReflectionClass($className);
+
+        if ($reflection->isEnum()) {
+            return new JsonSchemaEnum($className);
+        }
+
+        return new JsonSchemaObject($className);
     }
 
     public static function fromMethod(ReflectionMethod $method): object

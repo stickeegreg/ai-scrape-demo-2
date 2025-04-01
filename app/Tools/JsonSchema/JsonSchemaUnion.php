@@ -21,7 +21,7 @@ class JsonSchemaUnion extends AbstractJsonSchemaType
 
     public function jsonSerialize(): mixed
     {
-        $useOneOf = array_filter($this->types, fn ($type) => in_array($type->jsonSerialize()->type, ['object', 'array'])) !== [];
+        $useOneOf = array_filter($this->types, fn ($type) => in_array($type->jsonSerialize()->type ?? null, ['object', 'array', null])) !== [];
 
         if ($useOneOf) {
             $types = array_unique(array_map(fn ($type) => $type->jsonSerialize(), $this->types), SORT_REGULAR);

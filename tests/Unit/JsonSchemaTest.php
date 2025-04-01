@@ -9,6 +9,8 @@ use App\Tools\JsonSchema\JsonSchemaUnion;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionParameter;
+use Tests\Fixtures\SampleBackedEnum;
+use Tests\Fixtures\SampleEnum;
 use Tests\Fixtures\SampleObject;
 use Tests\Fixtures\SampleObjectSimple;
 use Tests\Fixtures\SampleObjectSimpleInt;
@@ -175,6 +177,52 @@ class JsonSchemaTest extends TestCase
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['type' => 'null'], ['type' => 'object']], 'description' => 'desc']], 'required' => ['x']]),
             json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleObjectSimple $x) => null))
+        );
+    }
+
+    public function test_that_it_handles_enums(): void
+    {
+        $this->assertEquals(
+            json_encode(['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY']]),
+            json_encode(JsonSchema::fromPhpType(SampleEnum::class))
+        );
+
+        $this->assertEquals(
+            json_encode(['enum' => [1, 2, 3]]),
+            json_encode(JsonSchema::fromPhpType(SampleBackedEnum::class))
+        );
+
+        $this->assertEquals(
+            json_encode(['type' => 'object', 'properties' => ['x' => ['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY'], 'description' => 'desc']], 'required' => ['x']]),
+            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleEnum $x) => null))
+        );
+
+        $this->assertEquals(
+            json_encode(['type' => 'object', 'properties' => ['x' => ['enum' => [1, 2, 3], 'description' => 'desc']], 'required' => ['x']]),
+            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleBackedEnum $x) => null))
+        );
+    }
+
+    public function test_that_it_handles_nullabe_enums(): void
+    {
+        $this->assertEquals(
+            json_encode(['oneOf' => [['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY']], ['type' => 'null']]]),
+            json_encode(JsonSchema::fromPhpType('?' . SampleEnum::class))
+        );
+
+        $this->assertEquals(
+            json_encode(['oneOf' => [['enum' => [1, 2, 3]], ['type' => 'null']]]),
+            json_encode(JsonSchema::fromPhpType('?' . SampleBackedEnum::class))
+        );
+
+        $this->assertEquals(
+            json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY']], ['type' => 'null']], 'description' => 'desc']], 'required' => ['x']]),
+            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleEnum $x) => null))
+        );
+
+        $this->assertEquals(
+            json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['enum' => [1, 2, 3]], ['type' => 'null']], 'description' => 'desc']], 'required' => ['x']]),
+            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleBackedEnum $x) => null))
         );
     }
 
