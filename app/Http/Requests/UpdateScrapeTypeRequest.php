@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\ScrapeTypes\ScrapeType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateScrapeTypeRequest extends FormRequest
@@ -24,7 +25,15 @@ class UpdateScrapeTypeRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'prompt' => ['present', 'string'],
-            'fields' => ['present', 'string', 'json'],
+            'type' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!ScrapeType::tryFrom($value)) {
+                        $fail("The {$attribute} must be a valid ScrapeType.");
+                    }
+                },
+            ],
         ];
     }
 }

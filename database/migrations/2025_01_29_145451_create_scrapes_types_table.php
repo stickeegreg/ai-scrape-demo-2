@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('prompt');
-            $table->json('fields');
+            $table->string('type');
             $table->timestamps();
         });
     }

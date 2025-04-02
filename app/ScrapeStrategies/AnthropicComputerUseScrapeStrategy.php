@@ -4,12 +4,10 @@ namespace App\ScrapeStrategies;
 
 use Anthropic;
 use App\CommandExecutors\RemoteCommandExecutor;
-use App\DataRepository;
 use App\Models\ScrapeRun;
 use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategyInterface;
 use App\Tools\AnthropicComputerUseTool;
-use App\Tools\SaveTextTool;
 use App\Tools\Utils\ToolCollection;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -24,14 +22,14 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
     ) {
     }
 
-    public function scrape(ScrapeRun $scrapeRun): array
+    public function scrape(ScrapeRun $scrapeRun): void
     {
         dump($scrapeRun->scrape->url);
+        $scrapeType = $scrapeRun->getScrapeType();
         $commandExecutor = new RemoteCommandExecutor($this->controlServiceAddress);
-        $dataRepository = new DataRepository();
         $toolCollection = new ToolCollection([
             new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
-            new SaveTextTool($dataRepository),
+            ...$scrapeType->getTools(),
         ]);
 
         $commandExecutor->execute('/home/stickee/start_recording.sh');
@@ -41,8 +39,6 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         // TODO: this should be done better
         sleep(5);
 
-        // $toolCollection->run('computer', ['mouse_move', null, [100, 100]]);
-        // $toolCollection->run('computer', ['type', 'This is a test']);
         $screenshotResult = $toolCollection->handle('computer', ['screenshot']);
 
         $client = Anthropic::factory()
@@ -55,8 +51,8 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         <SYSTEM_CAPABILITY>
         * You are utilising an Ubuntu virtual machine with internet access.
         * The Google Chrome browser is already installed and running, ready for you to interact with.
-        * When viewing a page it can be helpful to zoom out so that you can see everything on the page.  Either that, or make sure you scroll down to see everything before deciding something isn't available.
-        * When using your computer function calls, they take a while to run and send back to you.  Where possible/feasible, try to chain multiple of these calls all into one function calls request.
+        * When viewing a page it can be helpful to zoom out so that you can see everything on the page. Either that, or make sure you scroll down to see everything before deciding something isn't available.
+        * When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
         </SYSTEM_CAPABILITY>
 
         Close all modal dialogs (popups) before proceeding with any actions. For example, click ACCEPT, X or CLOSE.
@@ -111,8 +107,10 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                 $messages[] = [
                     'role' => 'assistant',
                     'content' => [
-                        'type' => 'text',
-                        'text' => 'Finished (stop_reason: end_turn)',
+                        [
+                            'type' => 'text',
+                            'text' => 'Finished (stop_reason: end_turn)',
+                        ],
                     ],
                 ];
 
@@ -208,16 +206,15 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
         $commandExecutor->execute('/home/stickee/stop_recording.sh');
 
         // TODO: Let the recording finish, do this a better way
-        sleep(2);
+        sleep(5);
 
         Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://' . $this->controlServiceAddress . '/get-recording'));
 
+        $scrapeRun->refresh();
         $data = $scrapeRun->data;
         $data['recording'] = 'recording-' . $scrapeRun->id . '.webm';
         $scrapeRun->data = $data;
         $scrapeRun->save();
-
-        return $dataRepository->getData();
     }
 
     public function getNoVncAddress(): string

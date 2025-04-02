@@ -6,6 +6,9 @@ use App\Models\Scrape;
 use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategy;
 use App\ScrapeStrategies\ScrapeStrategyFactory;
+use App\ScrapeTypes\ScrapeType as ScrapeTypeEnum;
+use App\ScrapeTypes\ScrapeTypeFactory;
+use App\ScrapeTypes\ScrapeTypeInterface;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 class ScrapeRun extends Model
 {
     protected $fillable = ['scrape_id', 'status'];
+    private ?ScrapeTypeInterface $scrapeType = null;
 
     /**
      * The model's default values for attributes.
@@ -41,29 +45,34 @@ class ScrapeRun extends Model
         return $this->belongsTo(Scrape::class);
     }
 
+
+    public function getScrapeType(): ScrapeTypeInterface
+    {
+        if (!$this->scrapeType) {
+            $scrapeTypeFactory = app()->make(ScrapeTypeFactory::class);
+            $this->scrapeType = $scrapeTypeFactory->create(ScrapeTypeEnum::from($this->scrape->scrapeType->type), $this->scrape->scrapeType->prompt, $this);
+        }
+
+        return $this->scrapeType;
+    }
+
     public function run(ProgressReporterInterface $progressReporter): void
     {
         try {
             $this->update(['status' => 'running']);
 
             $scrapeStrategyFactory = new ScrapeStrategyFactory();
-
             $scrapeStrategy = $scrapeStrategyFactory->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter);
+
             $data = $this->data;
             $data['no_vnc_address'] = $scrapeStrategy->getNoVncAddress();
             $this->data = $data;
             $this->save();
 
-            $result = $scrapeStrategy->scrape($this);
+            $scrapeStrategy->scrape($this);
+            $this->getScrapeType()->save();
 
             $this->update(['status' => 'completed']);
-
-            $this->refresh();
-            $data = $this->data;
-            $data['result'] = $result;
-            $this->data = $data;
-            $this->status = 'completed';
-            $this->save();
 
             $progressReporter->reportComplete();
         } catch (Exception $e) {

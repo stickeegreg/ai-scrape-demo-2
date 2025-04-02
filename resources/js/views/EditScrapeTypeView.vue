@@ -3,9 +3,11 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '../include/api';
 import { ValidationError } from '../include/validation-error';
+import { scrapeTypes } from '../include/scrape-types';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import ActionButton from '../components/ActionButton.vue';
 import TextInput from '../components/TextInput.vue';
+import SelectInput from '../components/SelectInput.vue';
 
 const props = defineProps({
     create: {
@@ -23,6 +25,7 @@ const error = ref(null);
 const errors = ref(null);
 const scrapeType = ref(null);
 const saving = ref(false);
+const typeOptions = Object.entries(scrapeTypes).map(([key, value]) => ({ value: key, label: value }));
 
 watch(
   () => route.params.id,
@@ -98,6 +101,7 @@ const saveScrapeType = async () => {
         }
 
         console.error(error);
+        alert(error.message);
         error.value = error.message;
     } finally {
         saving.value = false;
@@ -132,13 +136,13 @@ const saveScrapeType = async () => {
                     :error="errors?.prompt?.[0]"
                     type="textarea"
                 />
-                <TextInput
-                    name="fields"
-                    label="Fields"
-                    placeholder="Fields (JSON)"
-                    v-model="scrapeType.fields"
-                    :error="errors?.fields?.[0]"
-                    type="textarea"
+                <SelectInput
+                    name="type"
+                    label="Scrape Type"
+                    v-model="scrapeType.type"
+                    :error="errors?.type?.[0]"
+                    required
+                    :options="typeOptions"
                 />
                 <div class="flex items-center justify-between">
                     <ActionButton label="Save" type="submit" :disabled="saving" />

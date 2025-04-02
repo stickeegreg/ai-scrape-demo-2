@@ -12,19 +12,28 @@ class ScrapeStrategyFactory
     {
         // TODO: this should take a server from the pool
         $server = config('scrape.servers')[0];
+        $anthropicApiKey = config('scrape.anthropic.api_key');
 
-        switch ($scrapeStrategy) {
-            case ScrapeStrategy::AnthropicComputerUse:
-                return new AnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
-
-            case ScrapeStrategy::OpenAIO1WithAnthropicComputerUse:
-                return new OpenAIO1WithAnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
-
-            case ScrapeStrategy::OpenAIGPT4oMiniWithAnthropicComputerUse:
-                return new OpenAIGPT4oMiniWithAnthropicComputerUseScrapeStrategy($progressReporter, config('scrape.anthropic.api_key'), $server['vnc'], $server['control']);
-
-            default:
-                throw new Exception("Unknown scrape strategy: $scrapeStrategy");
-        }
+        return match ($scrapeStrategy) {
+            ScrapeStrategy::AnthropicComputerUse => new AnthropicComputerUseScrapeStrategy(
+                $progressReporter,
+                $anthropicApiKey,
+                $server['vnc'],
+                $server['control']
+            ),
+            ScrapeStrategy::OpenAIO1WithAnthropicComputerUse => new OpenAIO1WithAnthropicComputerUseScrapeStrategy(
+                $progressReporter,
+                $anthropicApiKey,
+                $server['vnc'],
+                $server['control']
+            ),
+            ScrapeStrategy::OpenAIGPT4oMiniWithAnthropicComputerUse => new OpenAIGPT4oMiniWithAnthropicComputerUseScrapeStrategy(
+                $progressReporter,
+                $anthropicApiKey,
+                $server['vnc'],
+                $server['control']
+            ),
+            default => throw new Exception("Unknown scrape strategy: $scrapeStrategy"),
+        };
     }
 }
