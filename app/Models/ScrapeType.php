@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use App\ScrapeTypes\ScrapeTypeFactory;
-use App\ScrapeTypes\ScrapeTypeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ScrapeType extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'prompt', 'type'];
 }

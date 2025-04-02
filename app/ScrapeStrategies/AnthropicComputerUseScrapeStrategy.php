@@ -57,6 +57,8 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 
         Close all modal dialogs (popups) before proceeding with any actions. For example, click ACCEPT, X or CLOSE.
         You may need to scroll up or down to see products or buttons.
+
+        Where possible, combine multiple tool uses into a single response.
         TEXT;
 
         $messages = [
