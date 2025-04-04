@@ -1,5 +1,6 @@
 #!/bin/bash
 
+killall ffmpeg || true
 rm -f /tmp/ffmpeg_recording.pid /tmp/recording.log /tmp/recording.webm
 
 # Start FFmpeg in the background

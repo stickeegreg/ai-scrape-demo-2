@@ -61,8 +61,8 @@ class ScrapeRun extends Model
         try {
             $this->update(['status' => 'running']);
 
-            $scrapeStrategyFactory = new ScrapeStrategyFactory();
-            $scrapeStrategy = $scrapeStrategyFactory->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter);
+            $scrapeStrategy = app()->make(ScrapeStrategyFactory::class)
+                ->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter);
 
             $data = $this->data;
             $data['no_vnc_address'] = $scrapeStrategy->getNoVncAddress();
@@ -76,6 +76,7 @@ class ScrapeRun extends Model
 
             $progressReporter->reportComplete();
         } catch (Exception $e) {
+            $this->fresh();
             $this->status = 'failed';
             $data = $this->data;
             $data['error'] = $e->getMessage();
