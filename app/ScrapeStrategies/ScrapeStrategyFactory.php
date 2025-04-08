@@ -14,6 +14,10 @@ class ScrapeStrategyFactory
         $server = config('scrape.servers')[0];
         $anthropicApiKey = config('scrape.anthropic.api_key');
 
+        if (!$anthropicApiKey) {
+            throw new Exception('No Anthropic API key set in config scrape.anthropic.api_key');
+        }
+
         return match ($scrapeStrategy) {
             ScrapeStrategy::AnthropicComputerUse => new AnthropicComputerUseScrapeStrategy(
                 $progressReporter,

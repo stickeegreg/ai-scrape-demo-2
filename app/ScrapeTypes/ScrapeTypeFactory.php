@@ -12,7 +12,7 @@ class ScrapeTypeFactory
     {
         return match ($scrapeType) {
             ScrapeType::Demo => new DemoScrapeType($prompt, $scrapeRun),
-            ScrapeType::WalletPayPal => new WalletPayPalScrapeType($prompt),
+            ScrapeType::WalletPayPal => new WalletPayPalScrapeType($prompt, 123, ScrapeContext::DesktopWeb, 'https://www.amazon.co.uk', false, 'UK'), // TODO: replace 123 with the actual URL ID
             default => throw new Exception("Unknown scrape type: $scrapeType"),
         };
     }

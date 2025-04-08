@@ -2,9 +2,8 @@
 
 namespace App\ScrapeTypes;
 
-use App\DataRepository;
-use App\Tools\SaveTextTool;
-
+use App\Tools\WalletPayPal\SaveErrorTool;
+use App\Tools\WalletPayPal\SavePageTool;
 
 // /**
 //  * How a payment option appears on the page.
@@ -183,18 +182,6 @@ use App\Tools\SaveTextTool;
 // }
 
 
-// export type ScrapeContext = 'Desktop Web' | 'Mobile Web';
-
-
-
-// export enum LoginDetails {
-//     PleaseChoose = 'Please choose',
-//     Failed = 'Failed',
-//     GuestCheckout = 'Guest Checkout',
-//     RequiresLogin = 'Requires Login',
-//     RequiresMembership = 'Requires Membership',
-// };
-
 // /**
 //  * This class holds data collected about a single website.
 //  */
@@ -266,14 +253,89 @@ use App\Tools\SaveTextTool;
 
 // };
 
+
+enum ScrapeContext: string {
+    case DesktopWeb = 'Desktop Web';
+    case MobileWeb = 'Mobile Web';
+}
+
+enum LoginDetails: string {
+    case PleaseChoose = 'Please choose';
+    case Failed = 'Failed';
+    case GuestCheckout = 'Guest Checkout';
+    case RequiresLogin = 'Requires Login';
+    case RequiresMembership = 'Requires Membership';
+}
+
+// TODO these should be dynamically fetched from WalletPayPal
+enum ErrorType: string {
+    case SITE_SERVER_UNAVAILABLE = 'Site/Server Unavailable';
+    case PAGE_NOT_FOUND = '404 Page Not Found';
+    case INSECURE_WEBSITE = 'Insecure Website';
+    case REQUIRES_IDENTIFICATION = 'Requires Identification';
+    case URL_ENRICHMENT = 'URL Enrichment';
+    case TECHNICAL_ERROR = 'Technical Error';
+    case REDIRECTS_TO_DIFFERENT_SITE = 'Redirects to a different site';
+    case QUOTATION_REQUIRED_BEFORE_PAYMENT = 'Quotation Required Before Payment';
+    case PAYMENTS_MANAGED_VIA_EXTERNAL_SITE = 'Payments managed via external site';
+    case HARD_BLOCK = 'Hard Block';
+    case NO_ECOMMERCE_PAYMENTS_ON_SITE = 'No Ecommerce/Payments On Site';
+    case BUSINESS_IS_CLOSING_HOLDING_PAGE = 'Business is closing holding page';
+    case OTHER = 'Other';
+}
+
 class WalletPayPalScrapeType implements ScrapeTypeInterface
 {
-    private readonly DataRepository $dataRepository;
+    /**
+     * @property {string} actualUrl The actual URL scraped.
+     */
+    private string $actualUrl = '';
 
+    /**
+     * @property {string} loginDetails Whether login is required for purchase.
+     */
+    private LoginDetails $loginDetails = LoginDetails::PleaseChoose;
+
+    /**
+     * @property {boolean} errorFailAllVariants If a failure, should we fail all variants.
+     */
+    private bool $errorFailAllVariants = false; // TODO
+
+    /**
+     * @property {Screenshot[]} errorScreenshots Screenshots taken when an error occurred.
+     */
+    private array $errorScreenshots = [];
+
+    /**
+     * @property {string} comments Additional comments.
+     */
+    private string $comments = '';
+
+    private SavePageTool $savePageTool;
+    private SaveErrorTool $saveErrorTool;
+
+    /**
+     * Constructor for the WalletPayPalScrapeType class.
+     *
+     * @param string $prompt The prompt to be used for scraping.
+     * @param int $urlId The ID of the URL record.
+     * @param string $context The context of the scrape (e.g., Desktop Web, Mobile Web).
+     * @param string $canonicalUrl The URL provided by PayPal.
+     * @param bool $firstTimeSignup Indicates if the user needs to sign up for an account.
+     * @param string $country The country code of the URL.
+     */
     public function __construct(
-        private readonly string $prompt
+        private readonly string $prompt,
+
+        // TODO: these should be on the ScrapeRun object?
+        private int $urlId,
+        private ScrapeContext $context, // TODO: use to determine if we are scraping mobile or desktop
+        private string $canonicalUrl,
+        private bool $firstTimeSignup, // TODO: if this is true we must sign up for an account
+        private string $country
     ) {
-        $this->dataRepository = new DataRepository();
+        $this->savePageTool = new SavePageTool();
+        $this->saveErrorTool = new SaveErrorTool();
     }
 
     public function getPrompt(): string
@@ -284,13 +346,26 @@ class WalletPayPalScrapeType implements ScrapeTypeInterface
     public function getTools(): array
     {
         return [
-            new SaveTextTool($this->dataRepository),
+            $this->savePageTool,
+            $this->saveErrorTool,
         ];
     }
 
     public function save(): void
     {
         // TODO Implement the save logic for WalletPayPal scrape type
-        dump($this->dataRepository);
+        $data = [
+            'urlId' => $this->urlId,
+            'actualUrl' => $this->actualUrl,
+            'loginDetails' => $this->loginDetails,
+            'error' => $this->saveErrorTool->getError(),
+            'errorType' => $this->saveErrorTool->getErrorType(),
+            'errorFailAllVariants' => $this->errorFailAllVariants,
+            'errorScreenshots' => $this->errorScreenshots,
+            'comments' => $this->comments,
+            'pages' => $this->savePageTool->getPages(),
+        ];
+
+        dump($data);
     }
 }

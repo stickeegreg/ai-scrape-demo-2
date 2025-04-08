@@ -27,11 +27,7 @@ class JsonSchemaEnum extends AbstractJsonSchemaType
     {
         $reflection = new ReflectionEnum($this->className);
 
-        $values = $reflection->isBacked()
-            ? array_map(fn($case) => $case->getBackingValue(), $reflection->getCases())
-            : array_map(fn($case) => $case->name, $reflection->getCases());
-        $values = array_unique($values);
-        $values = array_values($values);
+        $values = array_map(fn($case) => $case->name, $reflection->getCases());
 
         return (object)array_filter([
             'enum' => $values,

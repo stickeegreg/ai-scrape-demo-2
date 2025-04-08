@@ -7,6 +7,7 @@ use Closure;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionEnum;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -81,6 +82,21 @@ class JsonSchema
         return new JsonSchemaObject($className);
     }
 
+    private static function getToolParameter(ReflectionParameter $parameter): ToolParameter
+    {
+        if ($parameter->isVariadic()) {
+            throw new Exception('Variadic parameters are not supported: $' . $parameter->getName());
+        }
+
+        $parameterAttributes = $parameter->getAttributes(ToolParameter::class);
+
+        if ($parameterAttributes === []) {
+            throw new Exception('Missing ToolParameter attribute for: $' . $parameter->getName());
+        }
+
+        return $parameterAttributes[0]->newInstance();
+    }
+
     public static function fromMethod(ReflectionMethod $method): object
     {
         $parameters = $method->getParameters();
@@ -89,17 +105,7 @@ class JsonSchema
         $required = [];
 
         foreach ($parameters as $parameter) {
-            if ($parameter->isVariadic()) {
-                throw new Exception("Variadic parameters are not supported: " . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '() parameter $' . $parameter->getName());
-            }
-
-            $parameterAttributes = $parameter->getAttributes(ToolParameter::class);
-
-            if ($parameterAttributes === []) {
-                throw new Exception("Missing ToolParameter attribute for: " . $method->getDeclaringClass()->getName() . '::' . $method->getName() . '() parameter $' . $parameter->getName());
-            }
-
-            $toolParameter = $parameterAttributes[0]->newInstance();
+            $toolParameter = static::getToolParameter($parameter);
             $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
             $type->setDescription($toolParameter->description);
 
@@ -128,17 +134,7 @@ class JsonSchema
         $required = [];
 
         foreach ($parameters as $parameter) {
-            if ($parameter->isVariadic()) {
-                throw new Exception("Variadic parameters are not supported: " . $reflectionFunction->getName() . '() parameter $' . $parameter->getName());
-            }
-
-            $parameterAttributes = $parameter->getAttributes(ToolParameter::class);
-
-            if ($parameterAttributes === []) {
-                throw new Exception("Missing ToolParameter attribute for: " . $reflectionFunction->getName() . '() parameter $' . $parameter->getName());
-            }
-
-            $toolParameter = $parameterAttributes[0]->newInstance();
+            $toolParameter = static::getToolParameter($parameter);
             $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
             $type->setDescription($toolParameter->description);
 
@@ -156,5 +152,81 @@ class JsonSchema
         ];
 
         return $inputSchema;
+    }
+
+    public static function getCastToPhp(ReflectionParameter $reflectionParameter): Closure
+    {
+        return fn (mixed $value): mixed => static::toPhpValue($reflectionParameter, $value);
+    }
+
+    public static function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
+    {
+        $toolParameter = static::getToolParameter($parameter);
+
+        return $toolParameter->type
+            ? static::toPhpValueFromJsonSchemaType($toolParameter->type, $value)
+            : static::toPhpValueFromPhpType($parameter->getType(), $value);
+    }
+
+    private static function toPhpValueFromJsonSchemaType(JsonSchemaType $type, mixed $value): mixed
+    {
+        return $value;
+    }
+
+    private static function toPhpValueFromPhpType(ReflectionType $type, mixed $value): mixed
+    {
+        if ($type->allowsNull() && $value === null) {
+            return null;
+        }
+
+        if ($type instanceof ReflectionNamedType) {
+            if ($type->isBuiltin()) {
+                return match ($type->getName()) {
+                    'int' => (int) $value,
+                    'float' => (float) $value,
+
+                    // These should already be the correct type
+                    'string', 'bool' => $value,
+
+                    default => throw new InvalidArgumentException('Unsupported parameter type: ' . $type->getName()),
+                };
+            }
+
+
+            $className = $type->getName();
+
+            if (!class_exists($className)) {
+                throw new InvalidArgumentException("Class $className does not exist");
+            }
+
+            $reflection = new ReflectionClass($className);
+
+            if ($reflection->isEnum()) {
+                return $className::{$value};
+            }
+
+            if ($reflection->isInstantiable()) {
+                $result = new $className();
+
+                foreach ($value as $propertyName => $propertyValue) {
+                    $result->$propertyName = $propertyValue;
+                }
+
+                return $result;
+            }
+
+
+            throw new \Exception('NOT IMPLEMENTED');
+
+        }
+
+        if ($type instanceof ReflectionUnionType) {
+            foreach ($type->getTypes() as $subType) {
+                // TODO
+                throw new \Exception('NOT IMPLEMENTED');
+            }
+        }
+
+        throw new InvalidArgumentException('Unsupported parameter type: ' . $type->getName());
     }
 }
