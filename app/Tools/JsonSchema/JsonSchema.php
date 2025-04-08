@@ -161,68 +161,11 @@ class JsonSchema
         return fn (mixed $value): mixed => static::toPhpValue($reflectionParameter, $value);
     }
 
-    public static function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
+    private static function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
     {
         $toolParameter = static::getToolParameter($parameter);
         $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
 
         return $type->toPhpValue($value);
-    }
-
-    private static function toPhpValueFromPhpType(ReflectionType $type, mixed $value): mixed
-    {
-        if ($type->allowsNull() && $value === null) {
-            return null;
-        }
-
-        if ($type instanceof ReflectionNamedType) {
-            if ($type->isBuiltin()) {
-                return match ($type->getName()) {
-                    'int' => (int) $value,
-                    'float' => (float) $value,
-
-                    // These should already be the correct type
-                    'string', 'bool' => $value,
-
-                    default => throw new InvalidArgumentException('Unsupported parameter type: ' . $type->getName()),
-                };
-            }
-
-
-            $className = $type->getName();
-
-            if (!class_exists($className)) {
-                throw new InvalidArgumentException("Class $className does not exist");
-            }
-
-            $reflection = new ReflectionClass($className);
-
-            if ($reflection->isEnum()) {
-                return $className::{$value};
-            }
-
-            if ($reflection->isInstantiable()) {
-                $result = new $className();
-
-                foreach ($value as $propertyName => $propertyValue) {
-                    $result->$propertyName = $propertyValue;
-                }
-
-                return $result;
-            }
-
-
-            throw new \Exception('NOT IMPLEMENTED');
-
-        }
-
-        if ($type instanceof ReflectionUnionType) {
-            foreach ($type->getTypes() as $subType) {
-                // TODO
-                throw new \Exception('NOT IMPLEMENTED');
-            }
-        }
-
-        throw new InvalidArgumentException('Unsupported parameter type: ' . $type->getName());
     }
 }
