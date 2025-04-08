@@ -7,6 +7,7 @@ use App\Tools\JsonSchema\JsonSchema;
 use App\Tools\JsonSchema\JsonSchemaArray;
 use App\Tools\JsonSchema\JsonSchemaUnion;
 use Exception;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionParameter;
 use ReflectionType;
@@ -106,103 +107,71 @@ class JsonSchemaToPhpValueTest extends TestCase
         $this->assertEquals(null, JsonSchema::toPhpValue($this->getReflectionType('?' . SampleBackedEnum::class), null));
     }
 
-    // public function test_that_it_handles_classes(): void
-    // {
-    //     $this->assertEquals(
-    //         json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'number']]]),
-    //         json_encode(JsonSchema::fromPhpType(SampleObjectSimpleInt::class))
-    //     );
+    public function test_that_it_handles_classes(): void
+    {
+        $value = JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimpleInt::class), (object) ['x' => 1]);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value);
+        $this->assertEquals(1, $value->x);
+    }
 
-    //     $this->assertEquals(
-    //         json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'object', 'properties' => ['x' => ['type' => 'number']], 'description' => 'desc']], 'required' => ['x']]),
-    //         json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleObjectSimpleInt $x) => null))
-    //     );
-    // }
+    public function test_that_it_handles_nullable_classes(): void
+    {
+        $value = JsonSchema::toPhpValue($this->getReflectionType('?' . SampleObjectSimpleInt::class), (object) ['x' => 1]);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value);
+        $this->assertEquals(1, $value->x);
+    }
 
-    // public function test_that_it_handles_unions(): void
-    // {
-    //     $this->assertEquals(
-    //         json_encode(['type' => ['number', 'string']]),
-    //         json_encode(JsonSchema::fromPhpType('string | int | float'))
-    //     );
+    public function test_that_it_handles_invalid_classes_with_wrong_type(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
 
-    //     $type = [
-    //         'oneOf' => [
-    //             ['type' => 'object', 'properties' => ['x' => ['type' => 'number']]],
-    //             ['type' => 'object'],
-    //         ],
-    //     ];
+        JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimpleInt::class), (object) ['x' => '1']);
+    }
 
-    //     $expected = json_encode($type, JSON_PRETTY_PRINT);
-    //     $actual = json_encode(JsonSchema::fromPhpType(SampleObjectSimple::class . '|' . SampleObjectSimpleInt::class), JSON_PRETTY_PRINT);
+    public function test_that_it_handles_invalid_classes_with_missing_properties(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
 
-    //     $this->assertEquals($expected, $actual);
+        JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimpleInt::class), (object) []);
+    }
 
-    //     $expected = json_encode(
-    //         [
-    //             'type' => 'object',
-    //             'properties' => [
-    //                 'x' => [
-    //                     ...$type,
-    //                     'description' => 'desc'
-    //                 ]
-    //             ],
-    //             'required' => ['x']
-    //         ],
-    //         JSON_PRETTY_PRINT
-    //     );
+    public function test_that_it_handles_invalid_classes_with_extra_properties(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
 
-    //     $actual = json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleObjectSimple|SampleObjectSimpleInt $x) => null), JSON_PRETTY_PRINT);
+        JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimpleInt::class), (object) ['x' => 1, 'y' => 2]);
+    }
 
-    //     $this->assertEquals($expected, $actual);
-    // }
+    public function test_that_it_handles_unions(): void
+    {
+        $this->assertEquals(1, JsonSchema::toPhpValue($this->getReflectionType('int|string'), 1));
+        $this->assertEquals('1', JsonSchema::toPhpValue($this->getReflectionType('int|string'), '1'));
 
-    // public function test_that_it_handles_a_complex_type(): void
-    // {
-    //     $this->assertEquals(
-    //         json_encode(['type' => ['number', 'string']]),
-    //         json_encode(JsonSchema::fromPhpType('string | int | float'))
-    //     );
+        $value = JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimple::class . '|' . SampleObjectSimpleInt::class), (object) ['x' => 1]);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value);
+        $this->assertEquals(1, $value->x);
 
-    //     $type = [
-    //         'oneOf' => [
-    //             ['type' => 'number'],
-    //             [
-    //                 'type' => 'object',
-    //                 'properties' => [
-    //                     'name' => ['type' => ['number', 'string']],
-    //                     'number' => ['type' => 'number'],
-    //                     'description' => ['type' => ['null', 'string']],
-    //                     'data' => ['type' => 'array', 'items' => ['type' => 'string']],
-    //                     'data2' => ['type' => 'array', 'items' => ['type' => ['number', 'string']]],
-    //                     'isActive' => ['type' => 'boolean'],
-    //                 ],
-    //             ],
-    //             ['type' => 'object', 'properties' => ['x' => ['type' => 'number']]],
-    //         ],
-    //     ];
+        $value = JsonSchema::toPhpValue($this->getReflectionType(SampleObjectSimple::class . '|' . SampleObjectSimpleInt::class), (object) []);
+        $this->assertInstanceOf(SampleObjectSimple::class, $value);
+    }
 
-    //     $expected = json_encode($type, JSON_PRETTY_PRINT);
-    //     $actual = json_encode(JsonSchema::fromPhpType('float|' . SampleObject::class . '|' . SampleObjectSimpleInt::class), JSON_PRETTY_PRINT);
+    public function test_that_it_handles_a_complex_type(): void
+    {
+        $type = $this->getReflectionType('array', 'new \\App\\Tools\\JsonSchema\\JsonSchemaArray(new \\App\\Tools\\JsonSchema\\JsonSchemaUnion(new \\App\\Tools\\JsonSchema\\JsonSchemaObject(\\Tests\\Fixtures\\SampleObjectSimple::class), new \\App\\Tools\\JsonSchema\\JsonSchemaObject(\\Tests\\Fixtures\\SampleObjectSimpleInt::class), new \\App\\Tools\\JsonSchema\\JsonSchemaArray(\\Tests\\Fixtures\\SampleObjectSimpleInt::class)))');
+        $value = JsonSchema::toPhpValue($type, [(object) ['x' => 1], (object) [], (object) ['x' => 2], [(object) ['x' => 1], (object) ['x' => 2]]]);
 
-    //     $this->assertEquals($expected, $actual);
-
-    //     $expected = json_encode(
-    //         [
-    //             'type' => 'object',
-    //             'properties' => [
-    //                 'x' => [
-    //                     ...$type,
-    //                     'description' => 'desc'
-    //                 ]
-    //             ],
-    //             'required' => ['x']
-    //         ],
-    //         JSON_PRETTY_PRINT
-    //     );
-
-    //     $actual = json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] float|SampleObject|SampleObjectSimpleInt $x) => null), JSON_PRETTY_PRINT);
-
-    //     $this->assertEquals($expected, $actual);
-    // }
+        $this->assertIsArray($value);
+        $this->assertCount(4, $value);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value[0]);
+        $this->assertEquals(1, $value[0]->x);
+        $this->assertInstanceOf(SampleObjectSimple::class, $value[1]);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value[2]);
+        $this->assertEquals(2, $value[2]->x);
+        $this->assertIsArray($value[3]);
+        $this->assertCount(2, $value[3]);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value[3][0]);
+        $this->assertEquals(1, $value[3][0]->x);
+        $this->assertInstanceOf(SampleObjectSimpleInt::class, $value[3][1]);
+        $this->assertEquals(2, $value[3][1]->x);
+    }
 }

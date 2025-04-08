@@ -19,40 +19,60 @@ class JsonSchemaObject extends AbstractJsonSchemaType
         }
     }
 
-    public function jsonSerialize(): mixed
+    private function getValidProperties(): array
     {
         $reflection = new ReflectionClass($this->className);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-
-        $required = [];
-        $propertiesSchema = [];
+        $validProperties = [];
 
         foreach ($properties as $property) {
-            $toolProperty = ($property->getAttributes(ToolProperty::class)[0] ?? null)?->newInstance();
+            $propertyType = $this->getPropertyType($property);
 
-            if ($toolProperty === null) {
+            if ($propertyType === null) {
                 continue;
             }
 
+            $validProperties[] = $property;
+        }
+
+        return $validProperties;
+    }
+
+    private function getPropertyType(ReflectionProperty $property): ?JsonSchemaType
+    {
+        $toolProperty = ($property->getAttributes(ToolProperty::class)[0] ?? null)?->newInstance();
+
+        if ($toolProperty === null) {
+            return null;
+        }
+
+        $propertyName = $property->getName();
+
+        if ($toolProperty->type !== null) {
+            return $toolProperty->type;
+        }
+
+        if ($property->getType() === null) {
+            throw new Exception("Property $propertyName does not have a type");
+        }
+
+        return JsonSchema::fromPhpType($property->getType());
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        $required = [];
+        $propertiesSchema = [];
+
+        foreach ($this->getValidProperties() as $property) {
             $propertyName = $property->getName();
-            $propertyType = null;
-            $isRequired = false;
-
-            if ($toolProperty->type !== null) {
-                $propertyType = $toolProperty->type;
-            } else {
-                if ($property->getType() === null) {
-                    throw new Exception("Property $propertyName does not have a type");
-                }
-
-                $propertyType = JsonSchema::fromPhpType($property->getType());
-            }
+            $propertyType = $this->getPropertyType($property);
 
             $propertiesSchema[$propertyName] = $propertyType->jsonSerialize();
 
-            if ($required) {
-                $required[] = $propertyName;
-            }
+            // TODO fix this
+            // TODO support optional properties?
+            // $required[] = $propertyName;
         }
 
         return (object)array_filter([
@@ -61,5 +81,33 @@ class JsonSchemaObject extends AbstractJsonSchemaType
             'required' => $required,
             'description' => $this->description,
         ]);
+    }
+
+    public function toPhpValue(mixed $value): object
+    {
+        if (!is_object($value)) {
+            throw new InvalidArgumentException("Value must be an object");
+        }
+
+        $valueProperties = get_object_vars($value);
+
+        $validPropertyNames = array_map(fn($property) => $property->getName(),  $this->getValidProperties());
+        $givenPropertyNames = array_keys($valueProperties);
+
+        sort($validPropertyNames);
+        sort($givenPropertyNames);
+
+        if ($givenPropertyNames !== $validPropertyNames) {
+            throw new InvalidArgumentException("Value has invalid properties");
+        }
+
+        $result = new $this->className();
+
+        foreach ($this->getValidProperties() as $property) {
+            $propertyName = $property->getName();
+            $result->$propertyName = $this->getPropertyType($property)->toPhpValue($valueProperties[$propertyName]);
+        }
+
+        return $result;
     }
 }

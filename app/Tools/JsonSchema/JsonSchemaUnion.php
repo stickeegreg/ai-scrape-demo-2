@@ -41,4 +41,17 @@ class JsonSchemaUnion extends AbstractJsonSchemaType
             'description' => $this->description,
         ]);
     }
+
+    public function toPhpValue(mixed $value): mixed
+    {
+        foreach ($this->types as $type) {
+            try {
+                return $type->toPhpValue($value);
+            } catch (InvalidArgumentException) {
+                // Continue to the next type
+            }
+        }
+
+        throw new InvalidArgumentException("Value does not match any of the union types");
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Tools\JsonSchema;
 
 use App\Tools\JsonSchema\AbstractJsonSchemaType;
+use InvalidArgumentException;
 
 class JsonSchemaArray extends AbstractJsonSchemaType
 {
@@ -20,5 +21,19 @@ class JsonSchemaArray extends AbstractJsonSchemaType
             'items' => $this->itemType->jsonSerialize(),
             'description' => $this->description,
         ]);
+    }
+
+    public function toPhpValue(mixed $value): array
+    {
+        if (!is_array($value)) {
+            throw new InvalidArgumentException("Value must be an array");
+        }
+
+        $value = array_map(
+            fn($item) => $this->itemType->toPhpValue($item),
+            $value
+        );
+
+        return $value;
     }
 }

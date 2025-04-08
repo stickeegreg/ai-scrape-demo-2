@@ -30,10 +30,12 @@ class JsonSchema
             }
 
             foreach (explode('|', $rawPhpType) as $type) {
-                $types[] = match (mb_trim($type)) {
-                    // 'array' => new JsonSchemaArray(),
+                $type = mb_trim($type);
+
+                $types[] = match ($type) {
+                    // 'array' requires extra data so cannot be automatically converted, use e.g. #[ToolParameter('description', new JsonSchemaArray('int'))] instead
                     'bool' => new JsonSchemaBoolean(),
-                    'float', 'int' => new JsonSchemaNumber(),
+                    'float', 'int' => new JsonSchemaNumber($type),
                     'null' => new JsonSchemaNull(),
                     // 'object' => new JsonSchemaObject(),
                     'string' => new JsonSchemaString(),
@@ -162,15 +164,9 @@ class JsonSchema
     public static function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
     {
         $toolParameter = static::getToolParameter($parameter);
+        $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
 
-        return $toolParameter->type
-            ? static::toPhpValueFromJsonSchemaType($toolParameter->type, $value)
-            : static::toPhpValueFromPhpType($parameter->getType(), $value);
-    }
-
-    private static function toPhpValueFromJsonSchemaType(JsonSchemaType $type, mixed $value): mixed
-    {
-        return $value;
+        return $type->toPhpValue($value);
     }
 
     private static function toPhpValueFromPhpType(ReflectionType $type, mixed $value): mixed

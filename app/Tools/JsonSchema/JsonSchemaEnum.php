@@ -34,4 +34,17 @@ class JsonSchemaEnum extends AbstractJsonSchemaType
             'description' => $this->description,
         ]);
     }
+
+    public function toPhpValue(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            throw new InvalidArgumentException("Value must be a string");
+        }
+
+        if (!enum_exists($this->className)) {
+            throw new InvalidArgumentException("Enum $this->className does not exist");
+        }
+
+        return $this->className::{$value};
+    }
 }
