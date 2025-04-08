@@ -45,6 +45,10 @@ class JsonSchemaEnum extends AbstractJsonSchemaType
             throw new InvalidArgumentException("Enum $this->className does not exist");
         }
 
+        if (!in_array($value, array_map(fn($case) => $case->name, $this->className::cases()))) {
+            throw new InvalidArgumentException("Value $value is not a valid case of enum $this->className");
+        }
+
         return $this->className::{$value};
     }
 }
