@@ -11,6 +11,7 @@ class SaveErrorTool
 {
     private string $error = '';
     private ?ErrorType $errorType = null;
+    private array $errorScreenshots = [];
 
     #[ToolMethod('Save an error')]
     public function saveError(
@@ -34,5 +35,10 @@ class SaveErrorTool
     public function getErrorType(): ?ErrorType
     {
         return $this->errorType;
+    }
+
+    public function getErrorScreenshots(): array
+    {
+        return $this->errorScreenshots;
     }
 }

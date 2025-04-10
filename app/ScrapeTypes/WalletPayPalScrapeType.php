@@ -361,11 +361,19 @@ class WalletPayPalScrapeType implements ScrapeTypeInterface
             'error' => $this->saveErrorTool->getError(),
             'errorType' => $this->saveErrorTool->getErrorType(),
             'errorFailAllVariants' => $this->errorFailAllVariants,
-            'errorScreenshots' => $this->errorScreenshots,
+            'errorScreenshots' => $this->saveErrorTool->getErrorScreenshots(),
             'comments' => $this->comments,
             'pages' => $this->savePageTool->getPages(),
         ];
 
         dump($data);
+
+        $scrapeRun = $this->scrapeRun->fresh();
+
+        $data = $scrapeRun->data;
+        $data['result'] = $this->dataRepository->getData();
+        $scrapeRun->data = $data;
+
+        $scrapeRun->save();
     }
 }

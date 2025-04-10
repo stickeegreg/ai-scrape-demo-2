@@ -2,7 +2,8 @@
 
 namespace App\Tools;
 
-use App\CommandExecutors\CommandExecutorInterface;
+use App\ComputerControllers\ComputerControllerInterface;
+use App\ComputerControllers\ScreenshotType;
 use App\Tools\Utils\ToolInterface;
 use App\Tools\Utils\ToolResult;
 use Exception;
@@ -13,27 +14,23 @@ The tool parameters are defined by Anthropic and are not editable.
 */
 class AnthropicComputerUseTool implements ToolInterface
 {
-    private string $xDoTool;
-    private float $screenshotDelay = 0.5;
-
     public function __construct(
-        private CommandExecutorInterface $commandExecutor,
+        private ComputerControllerInterface $computerController,
         private int $width,
         private int $height,
         private ?int $displayNumber
     ) {
-        $this->xDoTool = $this->displayNumber ? "DISPLAY=:{$this->displayNumber} xdotool" : 'xdotool';
     }
 
     public function getName(): string
     {
         // NOTE: This name comes from Anthropic and must not be changed.
-        return "computer";
+        return 'computer';
     }
 
     public static function getDescription(): string
     {
-        return "Interact with the screen, keyboard, and mouse of the current computer.";
+        return 'Interact with the screen, keyboard, and mouse of the current computer.';
     }
 
     public function getInputSchema(): object
@@ -41,11 +38,11 @@ class AnthropicComputerUseTool implements ToolInterface
         // This is a special type, not a normal tool
         // See https://docs.anthropic.com/en/docs/build-with-claude/computer-use
         return (object)[
-            "type" => "computer_20241022",
-            "name" => "computer",
-            "display_width_px" => $this->width,
-            "display_height_px" => $this->height,
-            "display_number" => $this->displayNumber,
+            'type' => 'computer_20241022',
+            'name' => 'computer',
+            'display_width_px' => $this->width,
+            'display_height_px' => $this->height,
+            'display_number' => $this->displayNumber,
         ];
     }
 
@@ -57,66 +54,62 @@ class AnthropicComputerUseTool implements ToolInterface
     public function executeAction($action, ?string $text = null, ?array $coordinate = null): ToolResult
     {
         switch ($action) {
-            case "mouse_move":
-            case "left_click_drag":
+            case 'mouse_move':
                 if (!$coordinate || count($coordinate) !== 2) {
                     throw new Exception("Invalid coordinate for action: $action");
                 }
 
                 [$x, $y] = $coordinate;
 
-                return $this->runShell("{$this->xDoTool} mousemove --sync $x $y");
+                return new ToolResult($this->computerController->moveMouse($x, $y));
 
-            case "key":
+            case 'left_click_drag':
+                if (!$coordinate || count($coordinate) !== 2) {
+                    throw new Exception("Invalid coordinate for action: $action");
+                }
+
+                [$x, $y] = $coordinate;
+
+                return new ToolResult($this->computerController->leftClickDrag($x, $y));
+
+            case 'key':
                 if (!$text) {
                     throw new Exception("Text is required for action: $action");
                 }
 
-                return $this->runShell("{$this->xDoTool} key -- $text");
+                return new ToolResult($this->computerController->key($text));
 
-            case "type":
+            case 'type':
                 if (!$text) {
                     throw new Exception("Text is required for action: $action");
                 }
 
-                return $this->runShell("{$this->xDoTool} type --delay 12 -- " . escapeshellarg($text));
+                return new ToolResult($this->computerController->type($text));
 
-            case "left_click":
-            case "right_click":
-            case "middle_click":
-            case "double_click":
-                $clickArg = [
-                    "left_click" => "1",
-                    "right_click" => "3",
-                    "middle_click" => "2",
-                    "double_click" => "--repeat 2 --delay 500 1"
-                ][$action];
+            case 'cursor_position':
+                [
+                    'x' => $x,
+                    'y' => $y,
+                ] = $this->computerController->getCursorPosition();
 
-                return $this->runShell("{$this->xDoTool} click $clickArg");
+                return new ToolResult("X=$x,Y=$y");
 
-            case "screenshot":
-                return new ToolResult(base64Image: base64_encode($this->takeScreenshot()));
+            case 'left_click':
+                return new ToolResult($this->computerController->leftClick());
+
+            case 'right_click':
+                return new ToolResult($this->computerController->rightClick());
+
+            case 'middle_click':
+                return new ToolResult($this->computerController->middleClick());
+
+            case 'double_click':
+                return new ToolResult($this->computerController->doubleClick());
+
+            case 'screenshot':
+                return new ToolResult(base64Image: base64_encode($this->computerController->getScreenshot(ScreenshotType::SCREEN)));
             }
 
         throw new Exception("Invalid action: $action");
     }
-
-    private function runShell(string $command): ToolResult
-    {
-        $result = $this->commandExecutor->execute($command);
-
-        return new ToolResult($result->output, $result->exitCode ? $result->error : null);
-    }
-
-    private function takeScreenshot(): string
-    {
-        sleep($this->screenshotDelay);
-        // TODO inject url or screenshot strategy
-        // TODO error handling
-        return file_get_contents("http://localhost:3000/screenshot-desktop");
-    }
 }
-
-// Example usage:
-// $tool = new ComputerTool();
-// echo $tool->executeAction("mouse_move", null, [100, 200]);

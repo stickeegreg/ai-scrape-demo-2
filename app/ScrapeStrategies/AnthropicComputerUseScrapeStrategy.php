@@ -4,6 +4,7 @@ namespace App\ScrapeStrategies;
 
 use Anthropic;
 use App\CommandExecutors\RemoteCommandExecutor;
+use App\ComputerControllers\ComputerControllerInterface;
 use App\Models\ScrapeRun;
 use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategyInterface;
@@ -15,10 +16,9 @@ use Illuminate\Support\Facades\Storage;
 class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 {
     public function __construct(
-        private ProgressReporterInterface $progressReporter,
-        private string $apiKey,
-        private string $noVncAddress,
-        private string $controlServiceAddress
+        private readonly ProgressReporterInterface $progressReporter,
+        private readonly ComputerControllerInterface $computerController,
+        private readonly string $apiKey,
     ) {
     }
 
@@ -26,17 +26,15 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
     {
         dump($scrapeRun->scrape->url);
         $scrapeType = $scrapeRun->getScrapeType();
-        $commandExecutor = new RemoteCommandExecutor($this->controlServiceAddress);
         $toolCollection = new ToolCollection([
-            new AnthropicComputerUseTool($commandExecutor, 1024, 768, 1), // TODO take from vnc config
+            new AnthropicComputerUseTool($this->computerController, 1024, 768, 1), // TODO take from vnc config
             ...$scrapeType->getTools(),
         ]);
 
-        $commandExecutor->execute('/home/stickee/start_recording.sh');
+        $this->computerController->initialize($scrapeRun->scrape->url);
+        $this->computerController->startRecording();
 
         try {
-            $commandExecutor->execute('/home/stickee/start_chrome.sh ' . escapeshellarg($scrapeRun->scrape->url));
-
             // wait for the page to load
             // TODO: this should be done better
             sleep(5);
@@ -207,12 +205,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                 }
             }
         } finally {
-            $commandExecutor->execute('/home/stickee/stop_recording.sh');
-
-            // TODO: Let the recording finish, do this a better way
-            sleep(5);
-
-            Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', file_get_contents('http://' . $this->controlServiceAddress . '/get-recording'));
+            Storage::disk('public')->put('recording-' . $scrapeRun->id . '.webm', $this->computerController->stopRecording());
 
             $scrapeRun->refresh();
             $data = $scrapeRun->data;
@@ -220,10 +213,5 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
             $scrapeRun->data = $data;
             $scrapeRun->save();
         }
-    }
-
-    public function getNoVncAddress(): string
-    {
-        return $this->noVncAddress;
     }
 }

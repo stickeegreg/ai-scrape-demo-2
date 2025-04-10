@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ComputerControllers\ComputerControllerFactory;
+use App\ComputerControllers\VncComputerController;
 use App\Models\Scrape;
 use App\ProgressReporters\ProgressReporterInterface;
 use App\ScrapeStrategies\ScrapeStrategy;
@@ -61,13 +63,18 @@ class ScrapeRun extends Model
         try {
             $this->update(['status' => 'running']);
 
-            $scrapeStrategy = app()->make(ScrapeStrategyFactory::class)
-                ->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter);
+            $computerController = app()->make(ComputerControllerFactory::class)
+                ->create();
 
-            $data = $this->data;
-            $data['no_vnc_address'] = $scrapeStrategy->getNoVncAddress();
-            $this->data = $data;
-            $this->save();
+            $scrapeStrategy = app()->make(ScrapeStrategyFactory::class)
+                ->create(ScrapeStrategy::from($this->scrape->strategy), $progressReporter, $computerController);
+
+            if ($computerController instanceof VncComputerController) {
+                $data = $this->data;
+                $data['no_vnc_address'] = $computerController->getNoVncAddress();
+                $this->data = $data;
+                $this->save();
+            }
 
             $scrapeStrategy->scrape($this);
             $this->getScrapeType()->save();
