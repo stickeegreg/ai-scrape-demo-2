@@ -24,14 +24,14 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
 
     public function scrape(ScrapeRun $scrapeRun): void
     {
-        dump($scrapeRun->scrape->url);
-        $scrapeType = $scrapeRun->getScrapeType();
+        dump($scrapeRun->getUrl());
+
         $toolCollection = new ToolCollection([
-            new AnthropicComputerUseTool($this->computerController, 1024, 768, 1), // TODO take from vnc config
-            ...$scrapeType->getTools(),
+            new AnthropicComputerUseTool($this->computerController, 1024, 768, 1), // TODO take from computerController
+            ...$scrapeRun->getTools(),
         ]);
 
-        $this->computerController->initialize($scrapeRun->scrape->url);
+        $this->computerController->initialize($scrapeRun->getUrl());
         $this->computerController->startRecording();
 
         try {
@@ -75,7 +75,7 @@ class AnthropicComputerUseScrapeStrategy implements ScrapeStrategyInterface
                         ],
                         [
                             'type' => 'text',
-                            'text' => $scrapeRun->scrape->scrapeType->prompt . "\n\n" . $scrapeRun->scrape->prompt . "\n\n" . $scrapeRun->scrape->website->prompt,
+                            'text' => $scrapeRun->getPrompt(),
                         ],
                     ],
                 ],

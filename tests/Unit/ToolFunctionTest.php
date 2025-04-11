@@ -2,77 +2,46 @@
 
 namespace Tests\Unit;
 
+use App\Tools\Attributes\ToolFunction;
 use App\Tools\Attributes\ToolParameter;
 use App\Tools\JsonSchema\JsonSchema;
-use App\Tools\JsonSchema\JsonSchemaArray;
-use App\Tools\JsonSchema\JsonSchemaUnion;
 use PHPUnit\Framework\TestCase;
+use ReflectionFunction;
 
 class ToolFunctionTest extends TestCase
 {
-    public function test_that_it_handles_multiple_types(): void
+    public function test_that_it_handles_functions(): void
     {
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => [
-                'a' => ['type' => 'number', 'description' => 'myInt'],
-                'b' => ['type' => 'number', 'description' => 'myFloat'],
-                'c' => ['type' => 'string', 'description' => 'myString'],
-                'd' => ['type' => 'boolean', 'description' => 'myBool'],
+                'a' => ['type' => 'number', 'description' => 'This is of type int'],
+                'b' => ['type' => 'number', 'description' => 'This is of type float'],
+                'c' => ['type' => 'string', 'description' => 'This is of type string'],
+                'd' => ['type' => 'boolean', 'description' => 'This is of type bool'],
             ], 'required' => ['a', 'b', 'c', 'd']]),
-            json_encode(JsonSchema::fromFunction(fn (
-                #[ToolParameter('myInt')] int $a,
-                #[ToolParameter('myFloat')] float $b,
-                #[ToolParameter('myString')] string $c,
-                #[ToolParameter('myBool')] bool $d
-            ) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction('\\Tests\\testTool')))
         );
     }
 
-    public function test_that_it_handles_arrays_of_basic_types(): void
+    public function test_that_it_handles_lambda_functions(): void
     {
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('string'))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'number'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('float'))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'number'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('int'))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'boolean'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('bool'))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'null'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('null'))] array $x) => null))
-        );
-    }
+        $f = #[ToolFunction('testTool')]
+            function (
+                #[ToolParameter('This is of type int')] int $a,
+                #[ToolParameter('This is of type float')] float $b,
+                #[ToolParameter('This is of type string')] string $c,
+                #[ToolParameter('This is of type bool')] bool $d
+            ) {
+            };
 
-    public function test_that_it_handles_arrays_of_nullable_basic_types(): void
-    {
         $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['null', 'string']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'string')))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['null', 'number']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'float')))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['null', 'number']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'int')))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => ['boolean', 'null']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray(new JsonSchemaUnion('null', 'bool')))] array $x) => null))
-        );
-        $this->assertEquals(
-            json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'array', 'items' => ['type' => 'null'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc', new JsonSchemaArray('null'))] array $x) => null))
+            json_encode(['type' => 'object', 'properties' => [
+                'a' => ['type' => 'number', 'description' => 'This is of type int'],
+                'b' => ['type' => 'number', 'description' => 'This is of type float'],
+                'c' => ['type' => 'string', 'description' => 'This is of type string'],
+                'd' => ['type' => 'boolean', 'description' => 'This is of type bool'],
+            ], 'required' => ['a', 'b', 'c', 'd']]),
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction($f)))
         );
     }
 }

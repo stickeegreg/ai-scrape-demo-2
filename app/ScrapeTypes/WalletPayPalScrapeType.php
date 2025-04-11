@@ -2,6 +2,7 @@
 
 namespace App\ScrapeTypes;
 
+use App\Models\ScrapeRun;
 use App\Tools\WalletPayPal\SaveErrorTool;
 use App\Tools\WalletPayPal\SavePageTool;
 
@@ -326,6 +327,7 @@ class WalletPayPalScrapeType implements ScrapeTypeInterface
      */
     public function __construct(
         private readonly string $prompt,
+        private readonly ScrapeRun $scrapeRun,
 
         // TODO: these should be on the ScrapeRun object?
         private int $urlId,
@@ -354,7 +356,7 @@ class WalletPayPalScrapeType implements ScrapeTypeInterface
     public function save(): void
     {
         // TODO Implement the save logic for WalletPayPal scrape type
-        $data = [
+        $scrapeData = [
             'urlId' => $this->urlId,
             'actualUrl' => $this->actualUrl,
             'loginDetails' => $this->loginDetails,
@@ -366,12 +368,12 @@ class WalletPayPalScrapeType implements ScrapeTypeInterface
             'pages' => $this->savePageTool->getPages(),
         ];
 
-        dump($data);
+        dump($scrapeData);
 
         $scrapeRun = $this->scrapeRun->fresh();
 
         $data = $scrapeRun->data;
-        $data['result'] = $this->dataRepository->getData();
+        $data['result'] = $scrapeData;
         $scrapeRun->data = $data;
 
         $scrapeRun->save();

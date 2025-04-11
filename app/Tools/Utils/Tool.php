@@ -2,21 +2,21 @@
 
 namespace App\Tools\Utils;
 
+use App\Tools\Attributes\ToolFunction;
 use App\Tools\Attributes\ToolMethod;
 use App\Tools\JsonSchema\JsonSchema;
 use App\Tools\Utils\ToolInterface;
 use App\Tools\Utils\ToolResult;
 use Closure;
 use InvalidArgumentException;
+use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionParameter;
 
 class Tool implements ToolInterface
 {
-    public static function fromMethod(
-        object $instance,
-        ReflectionMethod $method,
-    ): self {
+    public static function fromMethod(object $instance, ReflectionMethod $method): self
+    {
         $toolMethod = ($method->getAttributes(ToolMethod::class)[0] ?? null)?->newInstance();
 
         if ($toolMethod === null) {
@@ -25,7 +25,7 @@ class Tool implements ToolInterface
 
         $casts = array_map(
             fn (ReflectionParameter $parameter): Closure => JsonSchema::getCastToPhp($parameter),
-            $method->getParameters(),
+            $method->getParameters()
         );
 
         $inputSchema = (object) [
@@ -36,6 +36,29 @@ class Tool implements ToolInterface
         $handler = $method->getClosure($instance);
 
         return new self($toolMethod->name ?? $method->getName(), $inputSchema, $handler, $casts);
+    }
+
+    public static function fromFunction(ReflectionFunction $function): self
+    {
+        $toolFunction = ($function->getAttributes(ToolFunction::class)[0] ?? null)?->newInstance();
+
+        if ($toolFunction === null) {
+            throw new InvalidArgumentException('ToolFunction attribute is required.');
+        }
+
+        $casts = array_map(
+            fn (ReflectionParameter $parameter): Closure => JsonSchema::getCastToPhp($parameter),
+            $function->getParameters()
+        );
+
+        $inputSchema = (object) [
+            'name' => $toolFunction->name ?? $function->getName(),
+            'description' => $toolFunction->description,
+            'input_schema' => JsonSchema::fromFunction($function),
+        ];
+        $handler = $function->getClosure();
+
+        return new self($toolFunction->name ?? $function->getName(), $inputSchema, $handler, $casts);
     }
 
     public function __construct(

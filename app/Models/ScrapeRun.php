@@ -48,7 +48,7 @@ class ScrapeRun extends Model
     }
 
 
-    public function getScrapeType(): ScrapeTypeInterface
+    private function getScrapeType(): ScrapeTypeInterface
     {
         if (!$this->scrapeType) {
             $scrapeTypeFactory = app()->make(ScrapeTypeFactory::class);
@@ -56,6 +56,23 @@ class ScrapeRun extends Model
         }
 
         return $this->scrapeType;
+    }
+
+    public function getTools(): array
+    {
+        return $this->getScrapeType()->getTools();
+    }
+
+    public function getPrompt(): string
+    {
+        return $this->scrape->scrapeType->prompt . "\n\n"
+            . $this->scrape->prompt . "\n\n"
+            . $this->scrape->website->prompt;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->scrape->url;
     }
 
     public function run(ProgressReporterInterface $progressReporter): void

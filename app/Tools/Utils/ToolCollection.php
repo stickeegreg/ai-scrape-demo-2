@@ -2,12 +2,15 @@
 
 namespace App\Tools\Utils;
 
+use App\Tools\Attributes\ToolFunction;
 use App\Tools\Attributes\ToolMethod;
 use App\Tools\Utils\Tool;
 use App\Tools\Utils\ToolInterface;
+use Closure;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionMethod;
 
 class ToolCollection
@@ -30,10 +33,27 @@ class ToolCollection
         $this->items[$name] = $tool;
     }
 
-    private function register(object $item): void
+    private function register(string | object $item): void
     {
         if ($item instanceof ToolInterface) {
             $this->addItem($item->getName(), $item);
+
+            return;
+        }
+
+        if (is_string($item) || ($item instanceof Closure)) {
+            $reflectionFunction = new ReflectionFunction($item);
+            $toolFunction = ($reflectionFunction->getAttributes(ToolFunction::class)[0] ?? null)?->newInstance();
+
+            if (!$toolFunction) {
+                throw new Exception('ToolFunction attribute is required.');
+            }
+
+            if (($item instanceof Closure) && !$toolFunction->name) {
+                throw new Exception('ToolFunction name is required for closures.');
+            }
+
+            $this->addItem($toolFunction->name ?? $reflectionFunction->getName(), Tool::fromFunction($reflectionFunction));
 
             return;
         }
@@ -65,7 +85,7 @@ class ToolCollection
         $tool = $this->items[$name] ?? null;
 
         if (!$tool) {
-            throw new Exception("Tool not found: $name");
+            throw new Exception("Tool not found: $name - Registered tools are " . implode(', ', array_keys($this->items)));
         }
 
         try {

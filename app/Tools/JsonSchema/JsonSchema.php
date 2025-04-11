@@ -127,10 +127,9 @@ class JsonSchema
         return $inputSchema;
     }
 
-    public static function fromFunction(Closure|string $function): object
+    public static function fromFunction(ReflectionFunction $function): object
     {
-        $reflectionFunction = new ReflectionFunction($function);
-        $parameters = $reflectionFunction->getParameters();
+        $parameters = $function->getParameters();
 
         $properties = [];
         $required = [];

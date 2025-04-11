@@ -8,6 +8,7 @@ use App\Tools\JsonSchema\JsonSchemaArray;
 use App\Tools\JsonSchema\JsonSchemaUnion;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use ReflectionFunction;
 use ReflectionParameter;
 use Tests\Fixtures\SampleBackedEnum;
 use Tests\Fixtures\SampleEnum;
@@ -89,7 +90,7 @@ class JsonSchemaTest extends TestCase
     {
         $this->expectException(Exception::class);
 
-        JsonSchema::fromFunction(fn ($x) => null);
+        JsonSchema::fromFunction(new ReflectionFunction(new ReflectionFunction(fn ($x) => null)));
     }
 
     public function test_that_it_rejects_invalid_types(): void
@@ -103,7 +104,7 @@ class JsonSchemaTest extends TestCase
     {
         $this->expectException(Exception::class);
 
-        JsonSchema::fromFunction(fn (array $x) => null);
+        JsonSchema::fromFunction(new ReflectionFunction(new ReflectionFunction(fn (array $x) => null)));
     }
 
     public function test_that_it_handles_arrays_of_basic_types(): void
@@ -163,7 +164,7 @@ class JsonSchemaTest extends TestCase
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'object', 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleObjectSimple $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] SampleObjectSimple $x) => null)))
         );
     }
 
@@ -176,7 +177,7 @@ class JsonSchemaTest extends TestCase
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['type' => 'null'], ['type' => 'object']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleObjectSimple $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] ?SampleObjectSimple $x) => null)))
         );
     }
 
@@ -194,12 +195,12 @@ class JsonSchemaTest extends TestCase
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleEnum $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] SampleEnum $x) => null)))
         );
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY'], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleBackedEnum $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] SampleBackedEnum $x) => null)))
         );
     }
 
@@ -217,12 +218,12 @@ class JsonSchemaTest extends TestCase
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY']], ['type' => 'null']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleEnum $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] ?SampleEnum $x) => null)))
         );
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['oneOf' => [['enum' => ['PEGASUS', 'UNICORN', 'EARTH_PONY']], ['type' => 'null']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] ?SampleBackedEnum $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] ?SampleBackedEnum $x) => null)))
         );
     }
 
@@ -235,7 +236,7 @@ class JsonSchemaTest extends TestCase
 
         $this->assertEquals(
             json_encode(['type' => 'object', 'properties' => ['x' => ['type' => 'object', 'properties' => ['x' => ['type' => 'number']], 'description' => 'desc']], 'required' => ['x']]),
-            json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleObjectSimpleInt $x) => null))
+            json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] SampleObjectSimpleInt $x) => null)))
         );
     }
 
@@ -272,7 +273,7 @@ class JsonSchemaTest extends TestCase
             JSON_PRETTY_PRINT
         );
 
-        $actual = json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] SampleObjectSimple|SampleObjectSimpleInt $x) => null), JSON_PRETTY_PRINT);
+        $actual = json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] SampleObjectSimple|SampleObjectSimpleInt $x) => null)), JSON_PRETTY_PRINT);
 
         $this->assertEquals($expected, $actual);
     }
@@ -321,7 +322,7 @@ class JsonSchemaTest extends TestCase
             JSON_PRETTY_PRINT
         );
 
-        $actual = json_encode(JsonSchema::fromFunction(fn (#[ToolParameter('desc')] float|SampleObject|SampleObjectSimpleInt $x) => null), JSON_PRETTY_PRINT);
+        $actual = json_encode(JsonSchema::fromFunction(new ReflectionFunction(fn (#[ToolParameter('desc')] float|SampleObject|SampleObjectSimpleInt $x) => null)), JSON_PRETTY_PRINT);
 
         $this->assertEquals($expected, $actual);
     }
