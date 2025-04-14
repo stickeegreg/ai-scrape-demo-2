@@ -12,6 +12,8 @@ class ToolMethodTest extends TestCase
 {
     public function test_that_it_handles_multiple_types(): void
     {
+        $jsonSchema = new JsonSchema();
+
         $o = new class {
             #[ToolMethod('myTool')]
             public function myTool(
@@ -30,7 +32,7 @@ class ToolMethodTest extends TestCase
                 'c' => ['type' => 'string', 'description' => 'myString'],
                 'd' => ['type' => 'boolean', 'description' => 'myBool'],
             ], 'required' => ['a', 'b', 'c', 'd']]),
-            json_encode(JsonSchema::fromMethod(new ReflectionMethod($o, 'myTool')))
+            json_encode($jsonSchema->fromMethod(new ReflectionMethod($o, 'myTool')))
         );
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Tools\JsonSchema;
 
 use App\Tools\JsonSchema\AbstractJsonSchemaType;
+use App\Tools\JsonSchema\Facades\JsonSchema;
 use InvalidArgumentException;
 
 class JsonSchemaUnion extends AbstractJsonSchemaType

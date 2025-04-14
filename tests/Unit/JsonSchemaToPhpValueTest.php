@@ -4,12 +4,12 @@ namespace Tests\Unit;
 
 use App\Tools\JsonSchema\JsonSchema;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use ReflectionParameter;
 use Tests\Fixtures\SampleBackedEnum;
 use Tests\Fixtures\SampleEnum;
 use Tests\Fixtures\SampleObjectSimple;
 use Tests\Fixtures\SampleObjectSimpleInt;
+use Tests\TestCase;
 
 class JsonSchemaToPhpValueTest extends TestCase
 {
@@ -25,7 +25,9 @@ class JsonSchemaToPhpValueTest extends TestCase
 
     private function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
     {
-        return JsonSchema::getCastToPhp($parameter)($value);
+        $jsonSchema = new JsonSchema();
+
+        return $jsonSchema->getCastToPhp($parameter)($value);
     }
 
     public function test_that_it_handles_basic_variables(): void

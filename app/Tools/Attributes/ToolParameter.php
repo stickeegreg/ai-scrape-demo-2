@@ -2,7 +2,7 @@
 
 namespace App\Tools\Attributes;
 
-use App\Tools\JsonSchema\JsonSchema;
+use App\Tools\JsonSchema\Facades\JsonSchema;
 use App\Tools\JsonSchema\JsonSchemaType;
 use Attribute;
 

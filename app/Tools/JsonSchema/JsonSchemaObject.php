@@ -4,6 +4,7 @@ namespace App\Tools\JsonSchema;
 
 use App\Tools\Attributes\ToolProperty;
 use App\Tools\JsonSchema\AbstractJsonSchemaType;
+use App\Tools\JsonSchema\Facades\JsonSchema;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;

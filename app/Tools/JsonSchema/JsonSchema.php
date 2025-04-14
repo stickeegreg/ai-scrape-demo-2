@@ -16,8 +16,7 @@ use ReflectionUnionType;
 
 class JsonSchema
 {
-    // TODO make not static
-    public static function fromPhpType(string|ReflectionType $phpType): JsonSchemaType
+    public function fromPhpType(string|ReflectionType $phpType): JsonSchemaType
     {
         if (is_string($phpType)) {
             $rawPhpType = preg_replace('/^\s*\?\s*/', '', $phpType);
@@ -38,7 +37,7 @@ class JsonSchema
                     'null' => new JsonSchemaNull(),
                     // 'object' => new JsonSchemaObject(),
                     'string' => new JsonSchemaString(),
-                    default => class_exists($type) ? self::fromClassName($type) : throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
+                    default => class_exists($type) ? $this->fromClassName($type) : throw new InvalidArgumentException("Unsupported PHP type: $phpType"),
                 };
             }
 
@@ -50,11 +49,11 @@ class JsonSchema
                 return new JsonSchemaNull();
             }
 
-            return new JsonSchemaUnion(new JsonSchemaNull(), self::fromPhpType($phpType->getName()));
+            return new JsonSchemaUnion(new JsonSchemaNull(), $this->fromPhpType($phpType->getName()));
         }
 
         if ($phpType instanceof ReflectionUnionType) {
-            $types = array_map(fn ($type) => self::fromPhpType($type), $phpType->getTypes());
+            $types = array_map(fn ($type) => $this->fromPhpType($type), $phpType->getTypes());
 
             return new JsonSchemaUnion(...$types);
         }
@@ -62,13 +61,13 @@ class JsonSchema
         if ($phpType instanceof ReflectionNamedType) {
             // TODO probably wrong? nullable?
             // dump($phpType);
-            return self::fromPhpType($phpType->getName());
+            return $this->fromPhpType($phpType->getName());
         }
 
         throw new InvalidArgumentException("Unsupported PHP type");
     }
 
-    private static function fromClassName(string $className): JsonSchemaType
+    private function fromClassName(string $className): JsonSchemaType
     {
         if (!class_exists($className)) {
             throw new InvalidArgumentException("Class $className does not exist");
@@ -83,7 +82,7 @@ class JsonSchema
         return new JsonSchemaObject($className);
     }
 
-    private static function getToolParameter(ReflectionParameter $parameter): ToolParameter
+    private function getToolParameter(ReflectionParameter $parameter): ToolParameter
     {
         if ($parameter->isVariadic()) {
             throw new Exception('Variadic parameters are not supported: $' . $parameter->getName());
@@ -98,17 +97,17 @@ class JsonSchema
         return $parameterAttributes[0]->newInstance();
     }
 
-    public static function fromMethod(ReflectionMethod $method): object
+    public function fromMethod(ReflectionMethod $method): object
     {
-        return static::fromMethodOrFunction($method);
+        return $this->fromMethodOrFunction($method);
     }
 
-    public static function fromFunction(ReflectionFunction $function): object
+    public function fromFunction(ReflectionFunction $function): object
     {
-        return static::fromMethodOrFunction($function);
+        return $this->fromMethodOrFunction($function);
     }
 
-    private static function fromMethodOrFunction(ReflectionFunction | ReflectionMethod $function): object
+    private function fromMethodOrFunction(ReflectionFunction | ReflectionMethod $function): object
     {
         $parameters = $function->getParameters();
 
@@ -116,8 +115,8 @@ class JsonSchema
         $required = [];
 
         foreach ($parameters as $parameter) {
-            $toolParameter = static::getToolParameter($parameter);
-            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
+            $toolParameter = $this->getToolParameter($parameter);
+            $type = $toolParameter->type ?? $this->fromPhpType($parameter->getType());
             $type->setDescription($toolParameter->description);
 
             $properties[$parameter->getName()] = $type->jsonSerialize();
@@ -136,15 +135,15 @@ class JsonSchema
         return $inputSchema;
     }
 
-    public static function getCastToPhp(ReflectionParameter $reflectionParameter): Closure
+    public function getCastToPhp(ReflectionParameter $reflectionParameter): Closure
     {
-        return fn (mixed $value): mixed => static::toPhpValue($reflectionParameter, $value);
+        return fn (mixed $value): mixed => $this->toPhpValue($reflectionParameter, $value);
     }
 
-    private static function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
+    private function toPhpValue(ReflectionParameter $parameter, mixed $value): mixed
     {
-        $toolParameter = static::getToolParameter($parameter);
-        $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
+        $toolParameter = $this->getToolParameter($parameter);
+        $type = $toolParameter->type ?? $this->fromPhpType($parameter->getType());
 
         return $type->toPhpValue($value);
     }

@@ -4,7 +4,7 @@ namespace App\Tools\Utils;
 
 use App\Tools\Attributes\ToolFunction;
 use App\Tools\Attributes\ToolMethod;
-use App\Tools\JsonSchema\JsonSchema;
+use App\Tools\JsonSchema\Facades\JsonSchema;
 use App\Tools\Utils\ToolInterface;
 use App\Tools\Utils\ToolResult;
 use Closure;

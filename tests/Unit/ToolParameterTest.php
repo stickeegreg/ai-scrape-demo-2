@@ -14,7 +14,9 @@ class ToolParameterTest extends TestCase
 {
     private function fromFunction(Closure $function): object
     {
-        return JsonSchema::fromFunction(new ReflectionFunction($function));
+        $jsonSchema = new JsonSchema();
+
+        return $jsonSchema->fromFunction(new ReflectionFunction($function));
     }
 
     public function test_that_it_handles_multiple_types(): void
