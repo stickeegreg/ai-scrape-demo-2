@@ -37,27 +37,33 @@ class ToolCollection
     {
         if ($item instanceof ToolInterface) {
             $this->addItem($item->getName(), $item);
+        } elseif (is_string($item) || ($item instanceof Closure)) {
+            $this->registerFromFunction($item);
+        } else {
+            $this->registerFromObject($item);
+        }
+    }
 
-            return;
+    private function registerFromFunction(string | Closure $item): void
+    {
+        $reflectionFunction = new ReflectionFunction($item);
+        $toolFunction = ($reflectionFunction->getAttributes(ToolFunction::class)[0] ?? null)?->newInstance();
+
+        if (!$toolFunction) {
+            throw new Exception('ToolFunction attribute is required.');
         }
 
-        if (is_string($item) || ($item instanceof Closure)) {
-            $reflectionFunction = new ReflectionFunction($item);
-            $toolFunction = ($reflectionFunction->getAttributes(ToolFunction::class)[0] ?? null)?->newInstance();
-
-            if (!$toolFunction) {
-                throw new Exception('ToolFunction attribute is required.');
-            }
-
-            if (($item instanceof Closure) && !$toolFunction->name) {
-                throw new Exception('ToolFunction name is required for closures.');
-            }
-
-            $this->addItem($toolFunction->name ?? $reflectionFunction->getName(), Tool::fromFunction($reflectionFunction));
-
-            return;
+        if (($item instanceof Closure) && !$toolFunction->name) {
+            throw new Exception('ToolFunction name is required for closures.');
         }
 
+        $name = $toolFunction->name ?? $reflectionFunction->getName();
+
+        $this->addItem($name, Tool::fromFunction($reflectionFunction));
+    }
+
+    private function registerFromObject(object $item): void
+    {
         $reflectionClass = new ReflectionClass($item);
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $hasToolMethods = false;

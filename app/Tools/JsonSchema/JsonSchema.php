@@ -7,7 +7,6 @@ use Closure;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionEnum;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -101,33 +100,15 @@ class JsonSchema
 
     public static function fromMethod(ReflectionMethod $method): object
     {
-        $parameters = $method->getParameters();
-
-        $properties = [];
-        $required = [];
-
-        foreach ($parameters as $parameter) {
-            $toolParameter = static::getToolParameter($parameter);
-            $type = $toolParameter->type ?? JsonSchema::fromPhpType($parameter->getType());
-            $type->setDescription($toolParameter->description);
-
-            $properties[$parameter->getName()] = $type->jsonSerialize();
-
-            if (!$parameter->isOptional()) {
-                $required[] = $parameter->getName();
-            }
-        }
-
-        $inputSchema = (object) [
-            "type" => "object",
-            "properties" => (object) $properties,
-            "required" => $required,
-        ];
-
-        return $inputSchema;
+        return static::fromMethodOrFunction($method);
     }
 
     public static function fromFunction(ReflectionFunction $function): object
+    {
+        return static::fromMethodOrFunction($function);
+    }
+
+    private static function fromMethodOrFunction(ReflectionFunction | ReflectionMethod $function): object
     {
         $parameters = $function->getParameters();
 
