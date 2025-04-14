@@ -28,11 +28,6 @@ class AnthropicComputerUseTool implements ToolInterface
         return 'computer';
     }
 
-    public static function getDescription(): string
-    {
-        return 'Interact with the screen, keyboard, and mouse of the current computer.';
-    }
-
     public function getInputSchema(): object
     {
         // This is a special type, not a normal tool
